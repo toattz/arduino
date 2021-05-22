@@ -2,6 +2,9 @@
 #include<Ethernet.h>
 #include<WebServer.h>
 #include<Streaming.h>
+#include<DHT.h>
+
+DHT dht(2,DHT11);
 
 byte mac[]={0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02};
 /*IPAddress ip(192,168,1,126);
@@ -17,7 +20,14 @@ WebServer webserver("",80);
 P(htmlHead)=
   "<!DOCTYPE html>"
   "<html>"
-  //"<head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"2\">"
+  "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\" />"
+  "<title>2 LEDs demo with Webduino</title></head>"
+  "<body>";
+
+P(htmlHeadRefresh)=
+  "<!DOCTYPE html>"
+  "<html>"
+  "<head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"2\">"
   "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\" />"
   "<title>2 LEDs demo with Webduino</title></head>"
   "<body>";
@@ -58,7 +68,7 @@ void defaultCmd(WebServer &server,WebServer::ConnectionType type)
   
   if(type!=WebServer::HEAD)
   {
-    server.printP(htmlHead);
+    server.printP(htmlHeadRefresh);
     server<<"<h1>Green LED:";
     if(gLedStatus==LOW)
     {
@@ -81,6 +91,36 @@ void defaultCmd(WebServer &server,WebServer::ConnectionType type)
     server<<"</h1>";
   }
   server.printP(htmlFooter);
+}
+
+void dht11Cmd(WebServer &server,WebServer::ConnectionType type)
+{
+  float h=dht.readHumidity(),t=dht.readTemperature();
+  server.httpSuccess();
+  
+  if(type!=WebServer::HEAD)
+  {
+    server.printP(htmlHeadRefresh);
+    server<<"<h1>Humidity:";
+    if(isnan(h))
+    { 
+      server<<"Nan";
+    }
+    else
+    {
+      server<<h;
+    }
+    server<<"<br>Temperature:";
+    if(isnan(t))
+    {
+      server<<"Nan";
+    }
+    else
+    {
+      server<<t;
+    }
+    server.printP(htmlFooter);
+  }
 }
 
 void postCmd(WebServer &server,WebServer::ConnectionType type)
@@ -153,7 +193,7 @@ void postCmd(WebServer &server,WebServer::ConnectionType type)
     }
     server.printP(formFooter);
     server.printP(htmlFooter);
-    server.printP(jQuery);
+    //server.printP(jQuery);
   }
 }
 
@@ -167,6 +207,7 @@ void postCmd(WebServer &server,WebServer::ConnectionType type)
 }*/
 void setup()
 {
+  dht.begin();
   pinMode(gLed,OUTPUT);
   pinMode(yLed,OUTPUT);
   pinMode(b1,INPUT_PULLUP);
@@ -178,8 +219,8 @@ void setup()
   Ethernet.begin(mac);
   IPAddress ip=Ethernet.localIP();
   webserver.setDefaultCommand(&defaultCmd);
-  //webserver.addCommand("faq.html",&faqCmd);
   webserver.addCommand("sw",&postCmd);
+  webserver.addCommand("dht11",&dht11Cmd);
   webserver.begin();
   Serial.print("IP address is:");
   Serial.println(ip);

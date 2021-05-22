@@ -7,7 +7,7 @@
 #include <ESP8266WiFi.h>
 
 // Replace with your network credentials
-const char* ssid     = "TP-LINK_470A9A";
+const char* ssid     = "TOTOLINK_470A9A";
 const char* password = "C1470A9A";
 
 // Set web server port number to 80

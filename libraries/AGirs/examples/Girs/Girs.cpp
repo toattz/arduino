@@ -158,9 +158,10 @@ bool reset = false;
 #ifndef PROGNAME
 #define PROGNAME "AGirs"
 #endif
-#ifndef VERSION
-#include "GirsLib/version.h"
+#ifdef VERSION
+#undef VERSION
 #endif // VERSION
+#include "GirsLib/version.h"
 #define okString "OK"
 #define errorString "ERROR"
 #define timeoutString "."
@@ -247,10 +248,10 @@ static void decodeOrDump(IrReader *irReader, Stream& stream) {
 
 static bool receive(Stream& stream) {
     IrReceiverSampler *irReceiver = IrReceiverSampler::getInstance();
-    if (irReceiver == NULL)
+    if (irReceiver == nullptr)
         irReceiver = IrReceiverSampler::newIrReceiverSampler(captureSize,
                 GirsUtils::receiverPin(receiverNo), GirsUtils::receiverPullup(receiverNo));
-    if (irReceiver == NULL)
+    if (irReceiver == nullptr)
         return false;
     irReceiver->setEndingTimeout(receiveEndingTimeout);
     irReceiver->setBeginningTimeout(beginTimeout);
@@ -284,7 +285,7 @@ static bool receive(Stream& stream) {
 static bool capture(Stream& stream) {
     IrWidget *irWidget = IrWidgetAggregating::newIrWidgetAggregating(captureSize,
             GirsUtils::sensorPullup(sensorNo));
-    if (irWidget == NULL)
+    if (irWidget == nullptr)
         stream.println(F("This cannot happen"));
     irWidget->setEndingTimeout(captureEndingTimeout);
     irWidget->setBeginningTimeout(beginTimeout);
@@ -322,13 +323,13 @@ extern const IrNamedRemoteSet remoteSet;
 
 static bool sendNamedCommand(Stream& stream, String& remoteName, String& commandName, unsigned int noSends) {
     const IrNamedRemote* remote = remoteSet.getIrNamedRemote(remoteName.c_str());
-    if (remote == NULL) {
+    if (remote == nullptr) {
         stream.println(F("No such remote"));
         return false;
     }
 
     const IrNamedCommand* command = remote->getIrNamedCommand(commandName.c_str());
-    if (command == NULL) {
+    if (command == nullptr) {
         stream.println(F("No such command"));
         return false;
     }
@@ -347,7 +348,7 @@ static void dumpRemote(Stream& stream, String& name) {
         stream.println();
     } else {
         const IrNamedRemote* remote = remoteSet.getIrNamedRemote(name.c_str());
-        if (remote == NULL)
+        if (remote == nullptr)
             stream.println(F("No such remote"));
         else {
             for (unsigned int i = 0; i < remote->getNoCommands(); i++) {
@@ -368,10 +369,13 @@ void setup() {
     // Make sure that sender is quiet (if reset or such)
     IrSenderPwm::getInstance(true)->mute();
 #endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     LedLcdManager::setup(LCD_I2C_ADDRESS, LCD_WIDTH, LCD_HEIGHT,
             (const pin_t[]) {SIGNAL_LED_1, SIGNAL_LED_2, SIGNAL_LED_3, SIGNAL_LED_4,
                     SIGNAL_LED_5, SIGNAL_LED_6, SIGNAL_LED_7, SIGNAL_LED_8 });
     LedLcdManager::selfTest(PROGNAME "\n" VERSION);
+#pragma GCC diagnostic pop
 #ifdef LED
     LedLcdManager::setupShouldTimeout(transmitled, false);
     LedLcdManager::setupShouldTimeout(receiveled, false);
@@ -402,7 +406,8 @@ void setup() {
     Ethernet.begin(mac, IPAddress(IPADDRESS), IPAddress(DNSSERVER), IPAddress(GATEWAY), IPAddress(SUBNETMASK));
 #endif // !DHCP
 
-    String ipstring = GirsUtils::ip2string(Ethernet.localIP());
+    char ipstring[16];
+    sprintf(ipstring, "%d.%d.%d.%d", Ethernet.localIP()[0], Ethernet.localIP()[1], Ethernet.localIP()[2], Ethernet.localIP()[3]);
     LedLcdManager::lcdPrint(ipstring, false, 0, 3);
 
 #ifdef BEACON
@@ -463,11 +468,11 @@ static inline bool isPrefix(const char *string, const String& cmd) {
 
 #ifdef ARDUINO
 bool isPrefix(const String& cmd, const __FlashStringHelper *pstring) {
-    return strncmp_PF(cmd.c_str(), (uint_farptr_t) pstring, cmd.length()) == 0;
+    return strncmp_PF(cmd.c_str(), reinterpret_cast<uint_farptr_t>(pstring), cmd.length()) == 0;
 }
 
 bool isPrefix(const __FlashStringHelper *pstring, const String& cmd) {
-    return strncmp_PF(cmd.c_str(), (uint_farptr_t) pstring, strlen_PF((uint_farptr_t) pstring)) == 0;
+    return strncmp_PF(cmd.c_str(), reinterpret_cast<uint_farptr_t>(pstring), strlen_PF(reinterpret_cast<uint_farptr_t>(pstring))) == 0;
 }
 #endif
 
@@ -566,9 +571,9 @@ static bool processCommand(const String& line, Stream& stream) {
         if (cmd[0] == 'p') { // parameter
         String variableName = tokenizer.getToken();
         long value = tokenizer.getInt();
-        unsigned long *variable32 = NULL;
-        uint16_t *variable16 = NULL;
-        uint8_t *variable8 = NULL;
+        unsigned long *variable32 = nullptr;
+        uint16_t *variable16 = nullptr;
+        uint8_t *variable8 = nullptr;
 #if defined(RECEIVE) || defined(CAPTURE)
            if (isPrefix(F("beg"), variableName))
             variable32 = &beginTimeout;
@@ -623,17 +628,17 @@ static bool processCommand(const String& line, Stream& stream) {
         {
         }
 
-        if (variable32 != NULL) {
+        if (variable32 != nullptr) {
             if (value != Tokenizer::invalid)
                 *variable32 = value;
 
             GirsUtils::printVariable(stream, variableName.c_str(), *variable32);
-        } else if (variable16 != NULL) {
+        } else if (variable16 != nullptr) {
             if (value != Tokenizer::invalid)
-                *variable16 = (uint16_t) value;
+                *variable16 = static_cast<uint16_t>(value);
 
             GirsUtils::printVariable(stream, variableName.c_str(), *variable16);
-        } else if (variable8 != NULL) {
+        } else if (variable8 != nullptr) {
             if (value != Tokenizer::invalid)
                 *variable8 = (uint8_t) value;
 
@@ -660,7 +665,7 @@ static bool processCommand(const String& line, Stream& stream) {
 
 #ifdef NAMED_COMMANDS
         if (cmd[0] == 'n') {
-        uint16_t noSends = (uint16_t) tokenizer.getInt();
+        uint16_t noSends = static_cast<uint16_t>(tokenizer.getInt());
         String remoteName = tokenizer.getToken();
         String commandName = tokenizer.getToken();
         bool success = sendNamedCommand(stream, remoteName, commandName, noSends);
@@ -683,14 +688,14 @@ static bool processCommand(const String& line, Stream& stream) {
 #ifdef TRANSMIT
         if (cmd[0] == 's') { // send
         // TODO: handle unparsable data gracefully
-        uint16_t noSends = (uint16_t) tokenizer.getInt();
+        uint16_t noSends = static_cast<uint16_t>(tokenizer.getInt());
         frequency_t frequency = tokenizer.getFrequency();
-        uint16_t introLength = (uint16_t) tokenizer.getInt();
-        uint16_t repeatLength = (uint16_t) tokenizer.getInt();
-        uint16_t endingLength = (uint16_t) tokenizer.getInt();
-        microseconds_t intro[introLength];
-        microseconds_t repeat[repeatLength];
-        microseconds_t ending[endingLength];
+        uint16_t introLength = static_cast<uint16_t>(tokenizer.getInt());
+        uint16_t repeatLength = static_cast<uint16_t>(tokenizer.getInt());
+        uint16_t endingLength = static_cast<uint16_t>(tokenizer.getInt());
+        microseconds_t *intro = new microseconds_t[introLength];
+        microseconds_t *repeat = new microseconds_t[repeatLength];
+        microseconds_t *ending = new microseconds_t[endingLength];
         for (uint16_t i = 0; i < introLength; i++)
             intro[i] = tokenizer.getMicroseconds();
         for (uint16_t i = 0; i < repeatLength; i++)
@@ -705,11 +710,11 @@ static bool processCommand(const String& line, Stream& stream) {
 
 #ifdef PRONTO
         if (isPrefix(cmd, F("hex"))) { // pronto hex send
-        uint16_t noSends = (uint16_t) tokenizer.getInt();
+        uint16_t noSends = static_cast<uint16_t>(tokenizer.getInt());
         String rest = tokenizer.getRest();
         IrSignal *irSignal = Pronto::parse(rest.c_str());
         bool status = false;
-        if (irSignal != NULL) {
+        if (irSignal != nullptr) {
             status = sendIrSignal(*irSignal, noSends); // waits
             delete irSignal;
         }
@@ -720,20 +725,20 @@ static bool processCommand(const String& line, Stream& stream) {
 #ifdef RENDERER
         if (cmd[0] == 't') { // transmit
         // TODO: handle unparseable data gracefully
-        uint16_t noSends = (uint16_t) tokenizer.getInt();
+        uint16_t noSends = static_cast<uint16_t>(tokenizer.getInt());
         String protocol = tokenizer.getToken();
-        const IrSignal *irSignal = NULL;
+        const IrSignal *irSignal = nullptr;
         if (isPrefix(protocol, F("nec1"))) {
-            unsigned int D = (unsigned) tokenizer.getInt();
-            unsigned int S = (unsigned) tokenizer.getInt();
-            unsigned int F = (unsigned) tokenizer.getInt();
+            unsigned int D = static_cast<unsigned>(tokenizer.getInt());
+            unsigned int S = static_cast<unsigned>(tokenizer.getInt());
+            unsigned int F = static_cast<unsigned>(tokenizer.getInt());
             irSignal = (F == Tokenizer::invalid)
                     ? Nec1Renderer::newIrSignal(D, S)
                     : Nec1Renderer::newIrSignal(D, S, F);
         } else if (isPrefix(protocol, F("rc5"))) {
-            unsigned int D = (unsigned) tokenizer.getInt();
-            unsigned int F = (unsigned) tokenizer.getInt();
-            unsigned int T = (unsigned) tokenizer.getInt();
+            unsigned int D = static_cast<unsigned>(tokenizer.getInt());
+            unsigned int F = static_cast<unsigned>(tokenizer.getInt());
+            unsigned int T = static_cast<unsigned>(tokenizer.getInt());
             irSignal = (T == Tokenizer::invalid)
                     ? Rc5Renderer::newIrSignal(D, F)
                     : Rc5Renderer::newIrSignal(D, F, T);
@@ -742,7 +747,7 @@ static bool processCommand(const String& line, Stream& stream) {
             stream.println(protocol);
         }
         bool status = false;
-        if (irSignal != NULL) {
+        if (irSignal != nullptr) {
             status = sendIrSignal(*irSignal, noSends); // waits, blinks
             delete irSignal;
         }
@@ -805,7 +810,8 @@ void loop() {
     client.setTimeout(10000);
 #ifdef LCD
     LedLcdManager::lcdPrint(F("Connection from"), true, 0, 0);
-    String ip = GirsUtils::ip2string(client.remoteIP());
+    char ip[16];
+    sprintf(ip, "%d.%d.%d.%d", Ethernet.localIP()[0], Ethernet.localIP()[1], Ethernet.localIP()[2], Ethernet.localIP()[3]);
     LedLcdManager::lcdPrint(ip, false, 0, 1);
 #endif
 #ifdef SERIAL_DEBUG
