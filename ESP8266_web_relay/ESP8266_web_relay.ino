@@ -1,14 +1,13 @@
 #include<ESP8266WiFi.h>
-#include<WiFiClient.h>
 #include<ESP8266WebServer.h>
-//#include <ESP8266mDNS.h>
-#define relayPin D2
-const char* ssid="TP-LINK_470A9A";
+
+#define relayPin D2 //GPIO16
+#define led D4      //GPIO2
+const char* ssid="TOTOLINK_470A9A";
 const char* password="C1470A9A";
 
 // Set web server port number to 80
 ESP8266WebServer server(80);
-
 
 const String onForms = "<html>\
   <head>\
@@ -16,10 +15,12 @@ const String onForms = "<html>\
     <title>ESP8266 Web Server Switch handling</title>\
   </head>\
   <body>\
-    <h1>狀態:開<br>\
     <form method=\"post\" enctype=\"text/plain\" action=\"/\">\
-      <input type=\"hidden\" name=\"sw\" value=\"0\">\
-      <input type=\"submit\" value=\"關\"></h1>\
+      <div style=\"position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;\">\
+        <h1>狀態:開</h1><br>\
+        <input type=\"hidden\" name=\"sw\" value=\"0\">\
+        <input type=\"submit\" value=\"關\" style=\"width:120px;height:40px;font-size:20px;\">\
+      </div>\
     </form>\
   </body>\
 </html>";
@@ -30,10 +31,12 @@ const String offForms = "<html>\
     <title>ESP8266 Web Server Switch handling</title>\
   </head>\
   <body>\
-    <h1>狀態:關<br>\
     <form method=\"post\" enctype=\"text/plain\" action=\"/\">\
-      <input type=\"hidden\" name=\"sw\" value=\"1\">\
-      <input type=\"submit\" value=\"開\"></h1>\
+      <div style=\"position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;\">\
+        <h1>狀態:關</h1><br>\
+        <input type=\"hidden\" name=\"sw\" value=\"1\">\
+        <input type=\"submit\" value=\"開\" style=\"width:120px;height:40px;font-size:20px;\">\
+      </div>\
     </form>\
   </body>\
 </html>";
@@ -44,7 +47,7 @@ void handleRoot()
   {
     //server.args==> args count
     //server.argName()==>plain
-    //server.arg()==> sw=1  here
+    //server.arg()==> sw=1 in here
     char sw=(char)server.arg(0)[3];
     //Serial.print("sw:");
     //Serial.println(atoi(&sw));
@@ -74,7 +77,8 @@ void handleRoot()
 void setup()
 {
   pinMode(relayPin,OUTPUT);
-  digitalWrite(relayPin,LOW);
+  pinMode(led,OUTPUT);
+  digitalWrite(led,HIGH);
   Serial.begin(115200);
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Connecting to ");
@@ -92,9 +96,20 @@ void setup()
   server.begin();
   server.on("/", handleRoot);
   Serial.println("HTTP server started"); 
+  digitalWrite(relayPin,HIGH);
+  delay(500);
+  digitalWrite(relayPin,LOW);
+  delay(500);
+  digitalWrite(relayPin,HIGH);
+  delay(500);
+  digitalWrite(relayPin,LOW);
+  delay(500);
+  digitalWrite(relayPin,HIGH);
+  delay(500);
+  digitalWrite(relayPin,LOW);
 }
 
-void loop() {
-  
+void loop()
+{
   server.handleClient();
 }
