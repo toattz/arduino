@@ -15,6 +15,7 @@ int gLedStatus=0,yLedStatus=0; //LED pins
 unsigned int debounce=0;
 const int b1=5,b2=9,b3=8;//buttin pins
 WebServer webserver("",80);
+String addr="";
 
 
 P(htmlHead)=
@@ -30,8 +31,9 @@ P(htmlHeadRefresh)=
   "<head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"2\">"
   "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\" />"
   "<title>2 LEDs demo with Webduino</title></head>"
-  "<body>";
-
+  "<body>"
+  "<div id=\"addr\"></div>";
+  
 P(formHead)=
   "<form method=\"post\" action=\"sw\">";
 
@@ -57,8 +59,28 @@ P(formFooter)=
 
 P(htmlFooter)=
   "</boyd></html>";
+  
 P(jQuery)=
   "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js\"></script>";
+
+P(script)=
+"<script>"
+  "var addr=document.getElementById('addr');"
+  "addr.innerHTML='<a href=\'http://'+location.hostname+'/ \ '>HOME</a> <a href=\'http://'+location.hostname+'/sw \ '>SW</a> <a href=\'http://'+location.hostname+'/dht11 \ '>DHT11</a>';"
+"</script>";
+/*
+<script>
+  var addr=document.getElementById('addr');
+  addr.innerHTML="<a href=\"http://"+location.hostname+"/ \">HOME</a>"+"<a href=\"http://"+location.hostname+"/sw \">SW</a>"+"<a href=\"http://"+location.hostname+"/dht11 \">dht11</a>"
+</script>
+*/
+String IpAddress2String(const IPAddress& ipAddress)
+{
+  return String(ipAddress[0]) + String(".") +\
+  String(ipAddress[1]) + String(".") +\
+  String(ipAddress[2]) + String(".") +\
+  String(ipAddress[3])  ; 
+}  
 
 void defaultCmd(WebServer &server,WebServer::ConnectionType type)
 { 
@@ -68,7 +90,8 @@ void defaultCmd(WebServer &server,WebServer::ConnectionType type)
   
   if(type!=WebServer::HEAD)
   {
-    server.printP(htmlHeadRefresh);
+    //server.printP(htmlHeadRefresh);
+    server.printP(htmlHead);
     server<<"<h1>Green LED:";
     if(gLedStatus==LOW)
     {
@@ -91,6 +114,7 @@ void defaultCmd(WebServer &server,WebServer::ConnectionType type)
     server<<"</h1>";
   }
   server.printP(htmlFooter);
+  server.printP(script);
 }
 
 void dht11Cmd(WebServer &server,WebServer::ConnectionType type)
@@ -120,6 +144,7 @@ void dht11Cmd(WebServer &server,WebServer::ConnectionType type)
       server<<t;
     }
     server.printP(htmlFooter);
+    server.printP(script);
   }
 }
 
@@ -193,7 +218,7 @@ void postCmd(WebServer &server,WebServer::ConnectionType type)
     }
     server.printP(formFooter);
     server.printP(htmlFooter);
-    //server.printP(jQuery);
+    server.printP(script);
   }
 }
 
@@ -218,6 +243,7 @@ void setup()
   //Ethernet.begin(mac,ip,subnet,gateway);
   Ethernet.begin(mac);
   IPAddress ip=Ethernet.localIP();
+  addr=IpAddress2String(ip);
   webserver.setDefaultCommand(&defaultCmd);
   webserver.addCommand("sw",&postCmd);
   webserver.addCommand("dht11",&dht11Cmd);
