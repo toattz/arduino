@@ -23,7 +23,8 @@ P(htmlHead)=
   "<html>"
   "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\" />"
   "<title>2 LEDs demo with Webduino</title></head>"
-  "<body>";
+  "<body>"
+  "<div id=\"addr\"></div>";
 
 P(htmlHeadRefresh)=
   "<!DOCTYPE html>"
@@ -66,12 +67,12 @@ P(jQuery)=
 P(script)=
 "<script>"
   "var addr=document.getElementById('addr');"
-  "addr.innerHTML='<a href=\'http://'+location.hostname+'/ \ '>HOME</a> <a href=\'http://'+location.hostname+'/sw \ '>SW</a> <a href=\'http://'+location.hostname+'/dht11 \ '>DHT11</a>';"
+  "addr.innerHTML='<a href=http://'+window.location.hostname+'/ \\ >HOME</a> <a href=http://'+window.location.hostname+'/sw \\ >SW</a>  <a href=http://'+window.location.hostname+'/dht11 \\ >DHT11</a>';"
 "</script>";
 /*
 <script>
   var addr=document.getElementById('addr');
-  addr.innerHTML="<a href=\"http://"+location.hostname+"/ \">HOME</a>"+"<a href=\"http://"+location.hostname+"/sw \">SW</a>"+"<a href=\"http://"+location.hostname+"/dht11 \">dht11</a>"
+  addr.innerHTML="<a href=\"http://"+windlocation.hostname+"/ \">HOME</a>"+"<a href=\"http://"+location.hostname+"/sw \">SW</a>"+"<a href=\"http://"+location.hostname+"/dht11 \">dht11</a>"
 </script>
 */
 String IpAddress2String(const IPAddress& ipAddress)
@@ -90,8 +91,8 @@ void defaultCmd(WebServer &server,WebServer::ConnectionType type)
   
   if(type!=WebServer::HEAD)
   {
-    //server.printP(htmlHeadRefresh);
-    server.printP(htmlHead);
+    server.printP(htmlHeadRefresh);
+    //server.printP(htmlHead);
     server<<"<h1>Green LED:";
     if(gLedStatus==LOW)
     {
