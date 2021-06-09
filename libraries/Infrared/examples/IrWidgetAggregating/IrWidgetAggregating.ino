@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <IrWidgetAggregating.h>
 
-#define BUFFERSIZE 200U
-#define BAUD 115200
+static constexpr size_t BUFFERSIZE = 200U;
+static constexpr uint32_t BAUD = 115200U;
 
 IrWidgetAggregating *capturer;
 
@@ -18,6 +18,8 @@ void loop() {
     capturer->capture();
     if (capturer->isEmpty())
         Serial.println(F("timeout"));
-    else
+    else {
         capturer->dump(Serial);
+        Serial.println();
+    }
 }
