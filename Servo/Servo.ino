@@ -1,6 +1,6 @@
 #include<Servo.h>
 #define SW_PIN 7
-#define SERVO_PIN 8
+#define SERVO_PIN 0
 Servo servo;
 int flag=1;
 void setup() {
@@ -12,15 +12,16 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   
-  if(digitalRead(SW_PIN)==0)
+  //if(digitalRead(SW_PIN)==0)
   {
-    if(flag==0)
+   // if(flag==0)
     {
       servo.write(180);
       flag=1;
     }
-    else
+   // else
     {
+      delay(2000);
       servo.write(0);
       flag=0;
     }
