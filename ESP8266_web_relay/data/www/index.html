@@ -6,14 +6,17 @@
   <body>
     <form enctype="text/plain">
       <div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">
-        <h1>狀態:開</h1><br>
+        <h1><div id="state"><div></h1><br>
         <input type="hidden" id="sw" value="0">
         <input id="submit" type="button" value="關" style="width:120px;height:40px;font-size:20px;">
       </div>
     </form>
   </body>
 </html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
+  var connection = new WebSocket('ws://'+location.hostname+':81/', ['arduino']);
+  var sw;
   function getData()
   {
     $.get("/state",function(data){
@@ -21,14 +24,16 @@
       if(data==1)
       {
         //alert("on");
-        $("#sw").value(0);
-        $("#submit").value("開");
+        $("#state").text("狀態:開")
+        $("#sw").val(0);
+        $("#submit").val("關");
       }
       else
       {
         //alert("off");
-        $("#sw").value(1);
-        $("#submit").value("關");
+        $("#state").text("狀態:關")
+        $("#sw").val(1);
+        $("#submit").val("開");
       }
     });
   }
@@ -38,9 +43,16 @@
   });
 
   $("#submit").click(function(){
+    sw=$("#sw").val();
+    //alert(sw);
+    connection.send(sw);
+    getData();
+  });
+ 
+  /*$("#submit").click(function(){
     var data = $("#sw").value();
     $.get("/sw", { val: data });
     sleep(1);
     getData();
-  });
+  });*/
 </script>
