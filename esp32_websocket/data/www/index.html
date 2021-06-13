@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf8">
+    <title>ESP32 Web Socket Demo</title>
+  </head>
+  <body>
+    <h1>Sensor:<span id="LDR"></span><br>
+    	<input type=hidden id="sw">
+    	<input type=button id="bu">button
+    </h1>
+
+  </body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+let hostname=window.location.host;
+
+$(function(){
+	let url="ws//:"+hostname+"/ws";
+	let ws;
+	wsInit(url);
+
+	function wsInit(url)
+	{
+		ws=new WebSocket(url);
+
+		ws.onopen=function(evt){
+			console.log("Connected to ESP32 server");
+		}
+
+		ws.onclose=function(evt){
+			console.log("Disconnected from ESP32 server");
+		}
+
+		ws.onerror=function(evt){
+			console.log("Error:"+evt.data);
+		}
+
+		ws.onmessage=function(evt){
+			console.log("Get message:"+evt.data);
+			let msg=JSON.parse(evt.data);
+			if(msg.device=="LDR")
+			{
+				$("#LDR").text(msg.val);
+			}
+
+
+		}
+	}
+
+
+
+	$("#bu").click(function(){
+		var data=1;
+		msg={"device":"LED","val":data};
+		ws.send(JSON.stringify(msg));
+		console.log("send "+JSON.stringify(msg));
+	});
+});
+
+</script>

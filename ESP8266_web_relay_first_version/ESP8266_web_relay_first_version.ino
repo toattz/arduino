@@ -1,8 +1,9 @@
 #include<ESP8266WiFi.h>
 #include<ESP8266WebServer.h>
 
-#define relayPin D2 //GPIO16
-//#define led D4      //GPIO2
+//ESP-01S
+#define relayPin 0  // relay connected to  GPIO0
+
 const char* ssid="ZYXEL_3F";
 const char* password="C1470A9A";
 
@@ -80,6 +81,9 @@ void setup()
   pinMode(LED_BUILTIN,OUTPUT);
   Serial.begin(115200);
   // Connect to Wi-Fi network with SSID and password
+
+  WiFi.mode(WIFI_STA);
+  WiFi.hostname("ESP-01S_CAT_FAN_RELAY_V1");
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);

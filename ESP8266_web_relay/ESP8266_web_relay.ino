@@ -1,13 +1,12 @@
 #include<ESP8266WiFi.h>
-//#include<ESP8266WebServer.h>
 #include<ESPAsyncWebServer.h>
 #include<ESPAsyncTCP.h>
 #include<WebSocketsServer.h>
 #include<FS.h>
+//ESP-01S
+#define relayPin 0// relay connected to  GPIO0
 
-#define relayPin D2 //GPIO16
-
-const char* ssid="ZYXEL_1F";
+const char* ssid="ZYXEL_3F";
 const char* password="C1470A9A";
 
 // Set web server port number to 80
@@ -45,6 +44,8 @@ void setup()
     return;
   }
   // Connect to Wi-Fi network with SSID and password
+  WiFi.mode(WIFI_STA);
+  WiFi.hostname("ESP-01S_CAT_FAN_RELAY_V2");
   Serial.printf("Connecting to %s\n",ssid);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
