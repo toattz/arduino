@@ -1,7 +1,7 @@
 #include<ESP8266WiFi.h>
 #include<ESPAsyncWebServer.h>
 #include<ESPAsyncTCP.h>
-#include<WebSocketsServer.h>
+//#include<WebSocketsServer.h>
 #include<FS.h>
 //ESP-01S
 #define relayPin 0// relay connected to  GPIO0
@@ -11,9 +11,9 @@ const char* password="C1470A9A";
 
 // Set web server port number to 80
 AsyncWebServer server(80);
-WebSocketsServer webSocket=WebSocketsServer(81);
+//WebSocketsServer webSocket=WebSocketsServer(81);
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length)
+/*void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length)
 {
   if(type==WStype_TEXT)
   {
@@ -29,7 +29,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       digitalWrite(relayPin,LOW);
     }
   }
-}
+}*/
 
 void setup()
 {
@@ -45,7 +45,8 @@ void setup()
   }
   // Connect to Wi-Fi network with SSID and password
   WiFi.mode(WIFI_STA);
-  WiFi.hostname("ESP-01S_CAT_FAN_RELAY_V2");
+  //WiFi.hostname("ESP-01S_CAT_FAN_RELAY_V2");
+  WiFi.hostname("啾啾王 ");
   Serial.printf("Connecting to %s\n",ssid);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -64,19 +65,36 @@ void setup()
   server.on("/state",HTTP_GET,[](AsyncWebServerRequest * req){
     if(digitalRead(relayPin)==HIGH)
     {
-      req->send(200,"text/plain",String("1"));
+      req->send(200,"text/plain",String("0"));
     }
     else
     {
-      req->send(200,"text/plain",String("0"));
+      req->send(200,"text/plain",String("1"));
     }
+    });
+
+  server.on("/sw",HTTP_POST,[](AsyncWebServerRequest * req){
+    /*if(req->hasParam("val"))
+    {
+      AsyncWebParameter *p=req->getParam("val");
+      if(p->value()=="1")
+      {
+        digitalWrite(relayPin,HIGH);
+      }
+      else
+      {
+        digitalWrite(relayPin,LOW);
+      }
+    }*/
+    digitalWrite(relayPin,!digitalRead(relayPin));
+    req->send(200);
     });
   server.begin();
   Serial.println("HTTP server started"); 
   
-  webSocket.onEvent(webSocketEvent);
+  /*webSocket.onEvent(webSocketEvent);
   webSocket.begin(); 
-  Serial.println("Websock is started");
+  Serial.println("Websock is started");*/
   
   digitalWrite(LED_BUILTIN,HIGH);
   delay(500);
@@ -93,5 +111,5 @@ void setup()
 
 void loop()
 {
-  webSocket.loop();
+  //webSocket.loop();
 }

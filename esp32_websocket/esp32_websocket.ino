@@ -39,7 +39,26 @@ void onSocketEvent(AsyncWebSocket *server,
       int val=doc["val"];
       if(strcmp(device,"LED")==0)
       {
-        digitalWrite(LED1,!digitalRead(LED1));
+        if(val!=2)
+        {
+          digitalWrite(LED1,val);
+        }
+        
+        const size_t capacity=JSON_OBJECT_SIZE(2);
+        DynamicJsonDocument doc(capacity);
+        doc["device"]="LED";
+        if(digitalRead(LED1)==HIGH)
+        {
+          doc["val"]="1";
+        }
+        else
+        {
+          doc["val"]="0";
+        }
+        
+        char data[30];
+        serializeJson(doc,data);
+        ws.textAll(data);
       }
       break;
     /*case WS_EVT_PONG:
