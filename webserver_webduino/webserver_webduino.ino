@@ -3,6 +3,7 @@
 #include<WebServer.h>
 #include<Streaming.h>
 #include<DHT.h>
+#include <IRremote.h>
 
 DHT dht(2,DHT11);
 
@@ -67,14 +68,10 @@ P(jQuery)=
 P(script)=
 "<script>"
   "var addr=document.getElementById('addr');"
+//  "addr.innerHTML='<a href=http://'+window.location.hostname+'/ \\ >HOME</a> <a href=http://'+window.location.hostname+'/sw \\ >SW</a>  <a href=http://'+window.location.hostname+'/dht11 \\ >DHT11</a> <a href=http://'+window.location.hostname+'/rc \\ >Remote Controller</a>';"
   "addr.innerHTML='<a href=http://'+window.location.hostname+'/ \\ >HOME</a> <a href=http://'+window.location.hostname+'/sw \\ >SW</a>  <a href=http://'+window.location.hostname+'/dht11 \\ >DHT11</a>';"
 "</script>";
-/*
-<script>
-  var addr=document.getElementById('addr');
-  addr.innerHTML="<a href=\"http://"+windlocation.hostname+"/ \">HOME</a>"+"<a href=\"http://"+location.hostname+"/sw \">SW</a>"+"<a href=\"http://"+location.hostname+"/dht11 \">dht11</a>"
-</script>
-*/
+
 String IpAddress2String(const IPAddress& ipAddress)
 {
   return String(ipAddress[0]) + String(".") +\
@@ -223,6 +220,43 @@ void postCmd(WebServer &server,WebServer::ConnectionType type)
   }
 }
 
+/*void rcCmd(WebServer &server,WebServer::ConnectionType type)
+{
+  char name[16],value[16];
+  server.httpSuccess();
+  if(type==WebServer::POST)
+  {
+    
+  }
+  server.printP(htmlHead);
+  server<<"<input type=button id=\"func\" value=\"功能\">";
+  server<<"<input type=button id=\"sleep\" value=\"安眠\">";
+  server<<"<input type=button id=\"direction\" value=\"風向\">";
+  server<<"<input type=button id=\"oneHour\" value=\"一小時後關機\"><br>";
+  server<<"<input type=button id=\"volume\" value=\"風量\">";
+  server<<"<input type=button id=\"timer\" value=\"定時\"><br>";
+  server<<"<input type=button id=\"up\" value=\"溫度上升\">";
+  server<<"<input type=button id=\"down\" value=\"溫度下降\">";
+  server<<"<input type=button id=\"power\" value=\"電源\">";
+  
+  server.printP(htmlFooter);
+  server.printP(jQuery);
+  //server.printP(script);
+  
+  server<<"<script>\
+  $(\"#fun\").click(function(){\
+    $.get(\"/ir\",{data:1111});  \
+  });";
+
+  server<<"</script>";
+}
+
+void irCmd(WebServer &server,WebServer::ConnectionType type)
+{
+  Serial.println("ir");
+}*/
+
+
 /*void faqCmd(WebServer &server,WebServer::ConnectionType type)
 {
   server.httpSuccess();
@@ -248,6 +282,8 @@ void setup()
   webserver.setDefaultCommand(&defaultCmd);
   webserver.addCommand("sw",&postCmd);
   webserver.addCommand("dht11",&dht11Cmd);
+  //webserver.addCommand("rc",&rcCmd);
+  //webserver.addCommand("ir",&irCmd);
   webserver.begin();
   Serial.print("IP address is:");
   Serial.println(ip);
