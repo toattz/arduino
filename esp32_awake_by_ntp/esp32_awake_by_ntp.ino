@@ -26,7 +26,8 @@ void setup()
   Serial.printf("\nIP address:%s\n",WiFi.localIP().toString().c_str());
 
   st.init(28800,0);
-  st.start(45,0,sendData);
+  int res=st.start(8,0,sendData);
+  Serial.printf("res:%d\n",res);
 
 }
 
