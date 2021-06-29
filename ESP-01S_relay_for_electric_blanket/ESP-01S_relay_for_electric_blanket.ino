@@ -113,7 +113,7 @@ void getCurrentDate()
   }
   
   unsigned int sec=epochTime;
-  Serial.printf("years:%d\nmonth:%d\ndate:%d\nhour:%d\nminute:%d\nsec:%d\n",years,months+1,date+1,hour,minute,sec);
+  //Serial.printf("years:%d\nmonth:%d\ndate:%d\nhour:%d\nminute:%d\nsec:%d\n",years,months+1,date+1,hour,minute,sec);
   getCommandTime=String(years)+"/"+String(months+1)+"/"+String(date+1)+" "+String(hour)+":"+String(minute)+":"+String(sec);
 }
   
