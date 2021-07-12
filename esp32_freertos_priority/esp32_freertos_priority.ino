@@ -7,8 +7,8 @@ void taskA(void *pdParam)
   {
     Serial.println("Task A");
     //printf("Task A");
-    vTaskDelay(1);
-    //yield();
+    //vTaskDelay(1);
+    yield();
     //esp_task_wdt_reset();
   }
 }
