@@ -2,8 +2,9 @@
 #include<ESPAsyncWebServer.h>
 #include<ESPmDNS.h>
 
-const char * ssid="TOTOLINK N150RT";
-const char * password="0422876333";
+const char *ssid = "ZYXEL_1F";
+//const char *ssid = "TP-LINK_470A9A";
+const char *password = "C1470A9A";
 
 AsyncWebServer server(80);
 

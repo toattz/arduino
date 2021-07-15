@@ -13,7 +13,7 @@
 #define BATT_UUID (uint16_t)0x180F
 
 uint8_t battLevel=100;
-const int LED=25;
+const int LED_BUILTIN=2;
 bool bleConnected=false;
 BLECharacteristic *pCharact_TX;
 BLECharacteristic *pCharactBatt;
@@ -58,7 +58,7 @@ void setup()
   Serial.begin(115200);
   pinMode(LED_BUILTIN,OUTPUT);
   
-  BLEDevice::init("ESP32 BLE test");
+  BLEDevice::init("ESP32 BLE Dev module");
   BLEServer *pServer=BLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
   //TX RX Service
