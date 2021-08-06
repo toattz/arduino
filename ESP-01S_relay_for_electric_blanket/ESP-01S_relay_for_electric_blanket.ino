@@ -9,11 +9,11 @@
 //#include<time.h>
 
 //ESP-01S
-#define relayPin 15// relay connected to  GPIO0
+#define relayPin 0// relay connected to  GPIO0
 
-const char* ssid="TOTOLINK N150RT";
-const char* password="0422876333";
-const char* mqttServer = "192.168.1.132";
+const char* ssid="ZYXEL_1F";
+const char* password="C1470A9A";
+const char* mqttServer="10.1.1.24";
 String getCommandTime="None";
 const int days_of_leap_year[]={31,29,31,30,31,30,31,31,30,31,30,31};
 const int days_of_normal_year[]={31,28,31,30,31,30,31,31,30,31,30,31};
@@ -28,7 +28,7 @@ NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
 
 void sendStatus()
 {
-  if(digitalRead(LED_BUILTIN)==HIGH)
+  if(digitalRead(relayPin)==HIGH)
   {
     mqttClient.publish("blanket/relay","off");
   }
@@ -134,13 +134,11 @@ void receivedCMD(char* topic, byte* payload, unsigned int noChar)
    
   if(cmd=="off")
   {
-    digitalWrite(LED_BUILTIN,HIGH);
-    //mqttClient.publish("blanket/relay","off");
+    digitalWrite(relayPin,HIGH);
   }
   else if(cmd=="on")
   {
-    digitalWrite(LED_BUILTIN,LOW);
-    //mqttClient.publish("blanket/relay","on");
+    digitalWrite(relayPin,LOW);
   }
   else
   {

@@ -16,6 +16,8 @@ const int DATA_TAG_SIZE = 8; // 8byte tag
 const int CHECKSUM_SIZE = 2; // 2byte checksum
 
 SoftwareSerial ssrfid = SoftwareSerial(6,8); 
+//SoftwareSerial ssrfid = SoftwareSerial(15,16); 
+
 
 uint8_t buffer[BUFFER_SIZE]; // used to store an incoming data frame 
 int buffer_index = 0;
