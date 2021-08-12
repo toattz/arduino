@@ -4,7 +4,6 @@
 #include<ESPAsyncTCP.h>
 #include<FS.h>
 #include<PubSubClient.h>
-#include<Ticker.h>
 #include<NTPClient.h>
 #include<WiFiUDP.h>
 
@@ -15,15 +14,27 @@ volatile int relayStatus=0;//0:off 1:on //get value from relay side
 volatile int blanketStatus=0; //0:off 1:on  
 volatile float topTemp=37,lowTemp=25; //the limit of trun on relay when lower than 25 and turn off relay when over 37, it is adjestable.
 String getCommandTime="None";
-const char* mqttServer = "192.168.1.132";
+const char* mqttServer = "UBUNTU.local";
 
 DHT dht11(D4,DHT11);
 AsyncWebServer server(80);
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
-//Ticker ticker;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+
+void checkStatus()
+{
+  if(blanketStatus==1&&relayStatus==0)
+  {
+    mqttClient.publish("blanket/dht11","on");
+  }
+
+  if(blanketStatus==0&&relayStatus==1)
+  {
+    mqttClient.publish("blanket/dht11","off");
+  }
+}
 
 void readDHT()
 {
@@ -38,53 +49,47 @@ void readDHT()
   {
     blanketStatus=0;
   }
-  /*Serial.print("Temperature:");
-  Serial.println(temp);
-  Serial.print("Humidity:");    
-  Serial.println(humi);*/
-}
-
-void checkStatus()
-{
-  if(blanketStatus==1&&relayStatus==0)
-  {
-    mqttClient.publish("blanket/dht11","1");
-  }
-
-  if(blanketStatus==0&&relayStatus==1)
-  {
-    mqttClient.publish("blanket/dht11","0");
-  }
+  Serial.println(String("Temperature:")+temp);
+  Serial.println(String("Humidity:")+humi);
+  checkStatus();
 }
 
 void receivedCMD(char* topic, byte* payload, unsigned int noChar)
 {
-  char v = (char) payload[0];
-  Serial.printf("topic:%s\n",topic);
-  Serial.print("value:");
-  Serial.println(v);
-  timeClient.update();
-  getCommandTime=timeClient.getFormattedTime();
-  Serial.println(getCommandTime);
-
-  if(v=='1')
+  String cmd="";
+  for(int i=0;i<noChar;i++)
   {
-    relayStatus=1;
+    cmd+=(char)payload[i]; 
   }
-  else if(v=='0')
+  Serial.println(topic);
+  //Serial.printf("payload:%u\n no boChar:%u\n",payload,noChar);
+  Serial.printf("cmd:%s\n",cmd.c_str());
+
+  if(cmd=="off")
   {
-    relayStatus=0; 
+    relayStatus=0;
+  }
+  else if(cmd=="on")
+  {
+    relayStatus=1; 
   }
   else
   {
     //Serial.println("invalid command");
   }
+ 
 }
 
 void setup() 
 {
   Serial.begin(115200);
   dht11.begin();
+
+  if(!SPIFFS.begin())
+  {
+    Serial.println("SPIFFS is broken");
+    return;
+  }
 
   WiFi.mode(WIFI_STA);
   WiFi.hostname("小心心的DHT11");
@@ -103,14 +108,39 @@ void setup()
   server.serveStatic("/img",SPIFFS,"/www/img/");
   server.serveStatic("/favicon.ico",SPIFFS,"/www/favicon.ico");
 
+  server.on("/state",HTTP_GET,[](AsyncWebServerRequest * req){
+    if(blanketStatus==1)
+    {
+      req->send(200,"text/plain",String("1"));
+    }
+    else
+    {
+      req->send(200,"text/plain",String("0"));
+    }
+    });
+  server.on("/sw",HTTP_POST,[](AsyncWebServerRequest * req){
+    if(blanketStatus==1)
+    {
+      mqttClient.publish("blanket/dht11","off");
+      blanketStatus=0;
+    }
+    else if(blanketStatus==0)
+    {
+      mqttClient.publish("blanket/dht11","on");
+      blanketStatus=1;
+    }
+    req->send(200);
+    });
+  server.on("/temperature",HTTP_GET,[](AsyncWebServerRequest *req){
+    req->send(200,"text/plain",String(temp));
+    });
+    
   server.begin();
   Serial.println("HTTP server started"); 
 
   mqttClient.setServer(mqttServer, 1883);
   mqttClient.setCallback(receivedCMD);
   Serial.println("Start MQTT");
-
-  //ticker.attach(5,sendStatus);
 
   timeClient.begin();
   // 設定時區 *60分 * 60秒，例如:
@@ -134,7 +164,7 @@ void setup()
 
 void loop() {
   readDHT();
-  delay(30000);
+  delay(3000);
   while(!mqttClient.connected())
   {
     mqttClient.connect("小心心的DHT11");

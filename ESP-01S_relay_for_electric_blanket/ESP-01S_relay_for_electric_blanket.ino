@@ -6,14 +6,13 @@
 #include<Ticker.h>
 #include<NTPClient.h>
 #include<WiFiUdp.h>
-//#include<time.h>
 
 //ESP-01S
 #define relayPin 0// relay connected to  GPIO0
 
 const char* ssid="ZYXEL_1F";
 const char* password="C1470A9A";
-const char* mqttServer="10.1.1.24";
+const char* mqttServer="UBUNTU.local";
 String getCommandTime="None";
 const int days_of_leap_year[]={31,29,31,30,31,30,31,31,30,31,30,31};
 const int days_of_normal_year[]={31,28,31,30,31,30,31,31,30,31,30,31};

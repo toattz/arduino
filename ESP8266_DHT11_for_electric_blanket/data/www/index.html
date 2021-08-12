@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="5">
+    <title>ESP-01S Electric blanket handling</title>
+  </head>
+  <body>
+    <h1>小心心的DHT11</h1>
+    <form enctype="text/plain">
+      <div id="link"></div>
+      <div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">
+        <h1><div id="state"></div><br>
+            <!--<div id="lastTime"></div>-->
+            <div id="temperature"></div></h1>
+      </div>
+    </form>
+  </body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  function getData()
+  {
+    $.get("/state",function(data){
+      //alert(data)
+      if(data==1)
+      {
+        $("#state").text("狀態:開");
+      }
+      else
+      {
+        $("#state").text("狀態:關");
+      }
+    });
+  }
+
+  /*function getTime()
+  {
+    $.get("/time",function(data){
+      $("#lastTime").text("最後更新時間:"+data);
+    });
+  }*/
+
+  function getTemp()
+  {
+    $.get("/temperature",function(data){
+      $("#temperature").text("溫度:"+data);
+    });
+  }
+
+  $(function(){
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/test.html">Test</a>');
+    getData();
+    //getTime();
+    getTemp();
+  });
+</script>
