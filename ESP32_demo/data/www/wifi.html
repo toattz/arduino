@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32 DEMO</title>
+  <style type="text/css">
+    body {
+      font-family: "微軟正黑體", "黑體-繁", sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="link"></div>
+  <h1>ESP32 DEMO Wifi<br>
+      <select id="wifilist">
+      </select>
+  </h1>
+</body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+  function getData()
+  {
+    /*let ssid;
+    $.get("/info",function(data)
+    {
+      ssid=data.ssid; 
+    });
+    alert(ssid);*/
+    $.get("/wifiList",function(data)
+    { 
+      for(let i=0;i<data.length;i++)
+      {
+        /*if(ssid==data[i])
+        {
+          $("#wifilist").append(new Option(data[i],i+1)).prop('selected',true);
+        }
+        else
+        {
+          $("#wifilist").append(new Option(data[i],i+1));
+        }*/
+        $("#wifilist").append(new Option(data[i],i+1));
+      }
+    });
+  }
+
+
+  $(function(){
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/wifi.html">WIFI</a>'+'   <a href="http://'+window.location.hostname+'/sw.html">SW</a>');
+     getData();
+  
+    /*window.setInterval(function(){
+      getData();
+    },2000);*/
+  });
+</script>

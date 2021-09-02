@@ -1,4 +1,7 @@
 #include<SPIFFS.h>
+#include <EEPROM.h>
+
+char sID[7];
 
 void writeFile()
 {
@@ -47,13 +50,18 @@ void setup()
 {
   Serial.begin(115200);
 
+  for (int i=0; i<6; i++)
+  {
+    sID[i] = EEPROM.read(i);
+  }
+
   if(!SPIFFS.begin(true))
   {
     Serial.println("Unable to mount SPIFFS");
     while(1)
       delay(10);
   }
-
+  Serial.printf("sID:%s\n",sID);
   writeFile();
   readFile();
   listFile();

@@ -7,9 +7,12 @@
   This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License:
   http://creativecommons.org/licenses/by-sa/4.0/
 
-  Version 2.9.2
+  Version 2.9.5
   Changelog:
 
+  Version 2.9.5: Compatibility with latest ESP8266 library
+  Version 2.9.4: Publish() fixes
+  Version 2.9.3: Compatibility fix
   Version 2.9.2: Fixes for cloud examples
   Version 2.9.1: Compatibility fix for the new aREST cloud broker (Aedes)
   Version 2.9.0: Compatibility fix for the new aREST cloud server
@@ -266,9 +269,9 @@ aREST(PubSubClient& client, char* new_mqtt_server) {
 }
 
 // Get topic
-// String get_topic() {
-//   return out_topic;
-// }
+String get_topic() {
+  return out_topic;
+}
 
 // Subscribe to events
 void subscribe(const String& device, const String& eventName) {
@@ -314,7 +317,7 @@ void publish(PubSubClient& client, const String& eventName, T data) {
     message.toCharArray(charBuf, 100);
 
     // Publish
-    client.publish(publish_topic, charBuf);
+    client.publish(publish_topic.c_str(), charBuf);
 
   }
 
@@ -348,7 +351,7 @@ void publish(PubSubClient& client, const String& eventName, T data, uint32_t cus
     message.toCharArray(charBuf, 100);
 
     // Publish
-    client.publish(publish_topic, charBuf);
+    client.publish(publish_topic.c_str(), charBuf);
 
   }
 
@@ -369,6 +372,7 @@ void setKey(char* api_key) {
   // Build topics IDs
   in_topic = id + String(api_key) + String("_in");
   out_topic = id + String(api_key) + String("_out");
+  publish_topic = id + String(api_key) + String("_event");
 
   // strcpy(in_topic, inTopic.c_str());
   // strcpy(out_topic, outTopic.c_str());
@@ -1601,6 +1605,7 @@ void set_id(const String& device_id) {
       // Build topics IDs
       in_topic = randomId + id + String("_in");
       out_topic = randomId + id + String("_out");
+      publish_topic = randomId + id + String("_event");
 
       // strcpy(in_topic, inTopic.c_str());
       // strcpy(out_topic, outTopic.c_str());
@@ -1614,6 +1619,7 @@ void set_id(const String& device_id) {
       // Build topics IDs
       in_topic = id + String(proKey) + String("_in");
       out_topic = id + String(proKey) + String("_out");
+      publish_topic = id + String(proKey) + String("_event");
 
       // strcpy(in_topic, keyInTopic.c_str());
       // strcpy(out_topic, keyOutTopic.c_str());
@@ -2007,7 +2013,7 @@ private:
   // Topics
   String in_topic;
   String out_topic;
-  char publish_topic[ID_SIZE + 10];
+  String publish_topic;
   String client_id;
 
   // Subscribe topics & handlers
