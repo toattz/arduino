@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32 DEMO</title>
+  <style type="text/css">
+    body {
+      font-family: "微軟正黑體", "黑體-繁", sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="link"></div>
+  <h1>ESP32 DEMO SW<br>
+      <input type="button" id="onboard" value="onboard"><br>
+      <input type="button" id="discard" value="discard"><br>
+      <input type="button" id="list" value="list">
+  </h1>
+</body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+  $(function(){
+    //$("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/wifi.html">WIFI</a>'+'   <a href="http://'+window.location.hostname+'/sw.html">SW</a>'+'   <a href="http://'+window.location.hostname+'/upload.html">UPLOAD</a>'+'   <a href="http://'+window.location.hostname+'/files.html">FILES</a>');
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/sw.html">SW</a>'+'   <a href="http://'+window.location.hostname+'/upload.html">UPLOAD</a>'+'   <a href="http://'+window.location.hostname+'/files.html">FILES</a>');
+
+    $("#onboard").attr("disabled", true);
+  
+    /*$("#onboard").click(function(){
+      $.get("/onboard",function(data)
+      { 
+      });
+    });*/
+  
+    $("#discard").click(function(){
+      $.get("/discard",function(data)
+      { 
+      });
+    });  
+
+    $("#list").click(function(){
+      $.get("/listFile",function(data){
+        //alert(data);
+      });
+    });
+  });
+</script>

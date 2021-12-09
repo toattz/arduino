@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>小心心的電毯</title>
+  </head>
+  <body>
+    <form enctype="text/plain">
+      <div id="link"></div>
+      <div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">     
+        <h1>
+          <div id="temperature"></div><br>
+          <div id="temperatureTop"></div><br>
+          <div id="temperatureLow"></div><br>
+          <div id="status"></div><br>
+          <!--<div id="millis"></div><br>-->
+        </h1>
+      </div>
+    </form>
+  </body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  function getData()
+  {
+    $.get("/status",function(data){
+      //alert(data);
+      $("#temperature").text("溫度:"+data.temperature);
+      $("#temperatureTop").text("最高溫度:"+data.temperatureTop);
+      $("#temperatureLow").text("最低溫度:"+data.temperatureLow);
+      if(data.status==0)
+      {
+        $("#status").text("狀態:降溫中");
+      }
+      else
+      {
+        $("#status").text("狀態:加熱中"); 
+      }
+      /*let millis;
+      if(data.millis<60000)
+      {
+
+      }
+      else if((data.millis>=60000)&&(data.millis<3600000))
+      {
+
+      }
+      else if((data.millis>=3600000)&&(data.millis<86400000))
+      {
+         
+      }
+      else
+      {
+
+      }
+      $("#millis").text("開機時間:"+data.millis);*/
+    });
+  }
+
+  $(function(){
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/setting.html">Setting</a>');
+    getData();
+  });
+</script>

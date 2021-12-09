@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32 DEMO</title>
+  <style type="text/css">
+    body {
+      font-family: "微軟正黑體", "黑體-繁", sans-serif;
+    }
+  </style>
+</head>
+
+<body> 
+  <div id="info">
+    <div id="link"></div>
+    <h1>ESP32 DEMO Main<br>
+        <!--<p><img src="img/logo.png" width="203" height="86"></p><br>-->
+        IP:<span id="ip"></span><br>
+        Status:<span id="status"></span><br>
+        SSID:<span id="ssid"></span><br>
+        UUID:<span id="uuid"></span><br>
+        <!--Server:<span id="server"></span>-->
+    </h1>
+  </div>
+</body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+  function getInfo()
+  {
+    $.get("/info",function(data)
+    {
+      $("#ip").text(data.ip);
+      $("#status").text(data.status);
+      $("#ssid").text(data.ssid);
+      $("#uuid").text(data.uuid);
+    });
+  }
+ 
+  $(function(){
+    //$("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/wifi.html">WIFI</a>'+'   <a href="http://'+window.location.hostname+'/sw.html">SW</a>'+'   <a href="http://'+window.location.hostname+'/upload.html">UPLOAD</a>'+'   <a href="http://'+window.location.hostname+'/files.html">FILES</a>');
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/sw.html">SW</a>'+'   <a href="http://'+window.location.hostname+'/upload.html">UPLOAD</a>'+'   <a href="http://'+window.location.hostname+'/files.html">FILES</a>');
+    getInfo();
+
+    /*window.setInterval(function(){
+       getInfo();
+    },2000);*/
+  });
+</script>

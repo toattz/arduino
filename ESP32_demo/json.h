@@ -13,6 +13,7 @@
 #include<ArduinoJson.h>
 
 #define CONFIG_FILE "/config.json"
+#define DEBUG 1
 
 char uuid[11];
 char ssid[64];
@@ -25,13 +26,18 @@ byte getInit()
   File file=SPIFFS.open(CONFIG_FILE,"r");
   if(file&&file.size())
   {
-    Serial.println("getInit():There is config.json");   
+    #if DEBUG
+      Serial.println("getInit():There is config.json");   
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc, file);
     if(error)
     {
+      #if DEBUG
       Serial.print(F("getInit() deserializeJson() failed: "));
       Serial.println(error.f_str());
+      #endif
+      
       initStatus=2;
     }  
     else
@@ -41,7 +47,9 @@ byte getInit()
   }
   else
   {
-    Serial.println("getInit():No config.json");
+    #if DEBUG
+      Serial.println("getInit():No config.json");
+    #endif
     initStatus=3;
   }
   file.close();
@@ -53,13 +61,17 @@ void getVersion()
   File file=SPIFFS.open(CONFIG_FILE,"r");
   if(file&&file.size())
   {
-    Serial.println("getVersion():There is config.json");   
+    #if DEBUG
+      Serial.println("getVersion():There is config.json");   
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc, file);
     if(error)
     {
-      Serial.print(F("getVersion() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.print(F("getVersion() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
       strcpy(ver,"No version");
     }  
     else
@@ -69,7 +81,9 @@ void getVersion()
   }
   else
   {
-    Serial.println("getVersion():No config.json");
+    #if DEBUG
+      Serial.println("getVersion():No config.json");
+    #endif      
     strcpy(ver,"No version");
   }
   file.close();
@@ -81,12 +95,16 @@ byte getOnboard()
   File file=SPIFFS.open(CONFIG_FILE,"r");
   if(file&&file.size())
   {
-    Serial.println("getOnboard():There is config.json");   
+    #if DEBUG
+      Serial.println("getOnboard():There is config.json");   
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc, file);
     if(error)
     {
-      Serial.print(F("getOnboard() deserializeJson() failed: "));
+      #if DEBUG
+        Serial.print(F("getOnboard() deserializeJson() failed: "));
+      #endif
       Serial.println(error.f_str());
       onboard=2;
     }  
@@ -97,7 +115,9 @@ byte getOnboard()
   }
   else
   {
-    Serial.println("getOnboard():No config.json");
+    #if DEBUG
+      Serial.println("getOnboard():No config.json");
+    #endif
     onboard=3;
   }
   file.close();
@@ -109,24 +129,32 @@ void getUUID()
   File file=SPIFFS.open(CONFIG_FILE,"r");
   if(file&&file.size())
   {
-    Serial.println("getUUID():There is config.json");   
+    #if DEBUG
+      Serial.println("getUUID():There is config.json");   
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc, file);
     if(error)
     {
-      Serial.print(F("getUUID() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.print(F("getUUID() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
       strcpy(uuid,"No UUID");
     }  
     else
     {
       strcpy(uuid,readDoc["uuid"]);
-      Serial.printf("UUID:%s\n",uuid);
+      #if DEBUG
+        Serial.printf("UUID:%s\n",uuid);
+      #endif
     }
   }
   else
   {
-    Serial.println("getUUID():No config.json");
+    #if DEBUG
+      Serial.println("getUUID():No config.json");
+    #endif
     strcpy(uuid,"No UUID");
   }
   file.close(); 
@@ -138,13 +166,17 @@ byte getConnected()
   File file=SPIFFS.open(CONFIG_FILE,"r");
   if(file&&file.size())
   {
-    Serial.println("getConnected():There is config.json");   
+    #if DEBUG
+      Serial.println("getConnected():There is config.json");   
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc, file);
     if(error)
     {
-      Serial.print(F("getConnected() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.print(F("getConnected() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
       connected=2;
     }  
     else
@@ -154,7 +186,9 @@ byte getConnected()
   }
   else
   {
-    Serial.println("getConnected():No config.json");
+    #if DEBUG
+      Serial.println("getConnected():No config.json");
+    #endif 
     connected=3;
   }
   file.close();
@@ -166,13 +200,17 @@ void getSSID()
   File file=SPIFFS.open(CONFIG_FILE,"r");
   if(file&&file.size())
   {
-    Serial.println("getSSID():There is config.json");   
+    #if DEBUG
+      Serial.println("getSSID():There is config.json");   
+    #endif 
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc, file);
     if(error)
     {
-      Serial.print(F("getSSID() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.print(F("getSSID() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
       strcpy(ssid,"No SSID");
     }  
     else
@@ -182,7 +220,9 @@ void getSSID()
   }
   else
   {
-    Serial.println("getSSID():No config.json");
+    #if DEBUG
+      Serial.println("getSSID():No config.json");
+    #endif
     strcpy(ssid,"No SSID");
   }
   file.close();   
@@ -193,13 +233,17 @@ void getPassword()
   File file=SPIFFS.open(CONFIG_FILE,"r");
   if(file&&file.size())
   {
-    Serial.println("getPassword():There is config.json");   
+    #if DEBUG
+      Serial.println("getPassword():There is config.json");   
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc, file);
     if(error)
     {
-      Serial.print(F("getPassword() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.print(F("getPassword() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
       strcpy(password,"");
     }  
     else
@@ -209,7 +253,9 @@ void getPassword()
   }
   else
   {
-    Serial.println("getPassword():No config.json");
+    #if DEBUG
+      Serial.println("getPassword():No config.json");
+    #endif
     strcpy(password,"");
   }
   file.close();  
@@ -217,19 +263,25 @@ void getPassword()
 
 void setInit()
 {
-  Serial.println("setUUID()");
+  #if DEBUG
+    Serial.println("setUUID()");
+  #endif
   File readFile=SPIFFS.open(CONFIG_FILE,"r");
   if(readFile&&readFile.size())
   { 
-    Serial.println("setUUID() file&&file.size()");
+    #if DEBUG
+      Serial.println("setUUID() file&&file.size()");
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc,readFile);
     readFile.close();
     if (error)
-    {
-      Serial.println("error");
-      Serial.print(F("setInit() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+    { 
+      #if DEBUG
+        Serial.println("error");
+        Serial.print(F("setInit() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
     }
     else
     {
@@ -246,32 +298,42 @@ void setInit()
       writeDoc["password"]=readDoc["password"];
       if(serializeJson(writeDoc,writeFile)==0)
       {
-        Serial.println(F("Failed to write to file when initConfig"));
+        #if DEBUG
+          Serial.println(F("Failed to write to file when initConfig"));
+        #endif
       }
       writeFile.close();
     }
   }
   else
   {
-    Serial.println("setInit() no file&&file.size()");
+    #if DEBUG
+      Serial.println("setInit() no file&&file.size()");
+    #endif
   }  
 }
 
 void setVersion(char *ver)
 {
-  Serial.println("setVersion()");
+  #if DEBUG
+    Serial.println("setVersion()");
+  #endif
   File readFile=SPIFFS.open(CONFIG_FILE,"r");
   if(readFile&&readFile.size())
   { 
-    Serial.println("setVersion() file&&file.size()");
+    #if DEBUG
+      Serial.println("setVersion() file&&file.size()");
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc,readFile);
     readFile.close();
     if (error)
     {
-      Serial.println("error");
-      Serial.print(F("setVersion() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.println("error");
+        Serial.print(F("setVersion() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
     }
     else
     {
@@ -286,32 +348,42 @@ void setVersion(char *ver)
       writeDoc["password"]=readDoc["password"];
       if(serializeJson(writeDoc,writeFile)==0)
       {
-        Serial.println(F("Failed to write to file when set version"));
+        #if DEBUG
+          Serial.println(F("Failed to write to file when set version"));
+        #endif
       }
       writeFile.close();
     }
   }
   else
   {
-    Serial.println("setVersion() no file&&file.size()");
+    #if DEBUG
+      Serial.println("setVersion() no file&&file.size()");
+    #endif
   }  
 }
 
 void setOnboard(byte onboard)
 {
-  Serial.println("setOnboard()");
+  #if DEBUG
+    Serial.println("setOnboard()");
+  #endif
   File readFile=SPIFFS.open(CONFIG_FILE,"r");
   if(readFile&&readFile.size())
   { 
-    Serial.println("setOnboard() file&&file.size()");
+    #if DEBUG
+      Serial.println("setOnboard() file&&file.size()");
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc,readFile);
     readFile.close();
     if (error)
     {
-      Serial.println("error");
-      Serial.print(F("setOnboard() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.println("error");
+        Serial.print(F("setOnboard() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
     }
     else
     {
@@ -326,20 +398,26 @@ void setOnboard(byte onboard)
       writeDoc["password"]=readDoc["password"];
       if(serializeJson(writeDoc,writeFile)==0)
       {
-        Serial.println(F("Failed to write to file when set onboard"));
+        #if DEBUG
+          Serial.println(F("Failed to write to file when set onboard"));
+        #endif
       }
       writeFile.close();
     }
   }
   else
   {
-    Serial.println("setOnboard() no file&&file.size()");
+    #if DEBUG
+      Serial.println("setOnboard() no file&&file.size()");
+    #endif
   }    
 }
 
 void setUUID() //for reset uuid, ex:disconnect from node.js server and generate new uuid
 {
-  Serial.println("setUUID()");
+  #if DEBUG
+    Serial.println("setUUID()");
+  #endif
   File readFile=SPIFFS.open(CONFIG_FILE,"r");
   if(readFile&&readFile.size())
   { 
@@ -349,9 +427,11 @@ void setUUID() //for reset uuid, ex:disconnect from node.js server and generate 
     readFile.close();
     if (error)
     {
-      Serial.println("error");
-      Serial.print(F("setInit() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.println("error");
+        Serial.print(F("setInit() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
     }
     else
     {
@@ -361,39 +441,51 @@ void setUUID() //for reset uuid, ex:disconnect from node.js server and generate 
       writeDoc["version"]=readDoc["version"];
       writeDoc["onboard"]=readDoc["onboard"];
       strcpy(uuid,String(esp_random()).c_str()); //set uuid when init, 
-      Serial.printf("UUID:%s\n",uuid);
+      #if DEBUG
+        Serial.printf("UUID:%s\n",uuid);
+      #endif
       writeDoc["uuid"]=uuid;
       writeDoc["connected"]=readDoc["connected"];
       writeDoc["ssid"]=readDoc["ssid"];
       writeDoc["password"]=readDoc["password"];
       if(serializeJson(writeDoc,writeFile)==0)
       {
-        Serial.println(F("Failed to write to file when set uuid"));
+        #if DEBUG
+          Serial.println(F("Failed to write to file when set uuid"));
+        #endif
       }
       writeFile.close();
     }
   }
   else
   {
-    Serial.println("setUUID() no file&&file.size()");
+    #if DEBUG
+      Serial.println("setUUID() no file&&file.size()");
+    #endif
   }  
 }
 
 void setConnected(byte connection)
 {
-  Serial.println("setConnected()");
+  #if DEBUG
+    Serial.println("setConnected()");
+  #endif
   File readFile=SPIFFS.open(CONFIG_FILE,"r");
   if(readFile&&readFile.size())
   { 
-    Serial.println("setConnected() file&&file.size()");
+    #if DEBUG
+      Serial.println("setConnected() file&&file.size()");
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc,readFile);
     readFile.close();
     if (error)
     {
-      Serial.println("error");
-      Serial.print(F("setConnected() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.println("error");
+        Serial.print(F("setConnected() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
     }
     else
     {
@@ -408,32 +500,42 @@ void setConnected(byte connection)
       writeDoc["password"]=readDoc["password"];
       if(serializeJson(writeDoc,writeFile)==0)
       {
-        Serial.println(F("Failed to write to file when set connected"));
+        #if DEBUG
+          Serial.println(F("Failed to write to file when set connected"));
+        #endif
       }
       writeFile.close();
     }
   }
   else
   {
-    Serial.println("setConnected() no file&&file.size()");
+    #if DEBUG
+      Serial.println("setConnected() no file&&file.size()");
+    #endif
   }      
 }
 
 void setSSID()
 {
-  Serial.println("setSSID()");
+  #if DEBUG
+    Serial.println("setSSID()");
+  #endif
   File readFile=SPIFFS.open(CONFIG_FILE,"r");
   if(readFile&&readFile.size())
   { 
-    Serial.println("setSSID() file&&file.size()");
+    #if DEBUG
+      Serial.println("setSSID() file&&file.size()");
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc,readFile);
     readFile.close();
     if (error)
     {
-      Serial.println("error");
-      Serial.print(F("setSSID() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.println("error");
+        Serial.print(F("setSSID() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
     }
     else
     {
@@ -448,32 +550,42 @@ void setSSID()
       writeDoc["password"]=readDoc["password"];
       if(serializeJson(writeDoc,writeFile)==0)
       {
-        Serial.println(F("Failed to write to file when set ssid"));
+        #if DEBUG
+          Serial.println(F("Failed to write to file when set ssid"));
+        #endif
       }
       writeFile.close();
     }
   }
   else
   {
-    Serial.println("setSSID() no file&&file.size()");
+    #if DEBUG
+      Serial.println("setSSID() no file&&file.size()");
+    #endif
   }        
 }
 
 void setPassword()
 {
-  Serial.println("setPassword()");
+  #if DEBUG
+    Serial.println("setPassword()");
+  #endif
   File readFile=SPIFFS.open(CONFIG_FILE,"r");
   if(readFile&&readFile.size())
   { 
-    Serial.println("setPassword() file&&file.size()");
+    #if DEBUG
+      Serial.println("setPassword() file&&file.size()");
+    #endif
     StaticJsonDocument<512> readDoc;
     DeserializationError error = deserializeJson(readDoc,readFile);
     readFile.close();
     if (error)
     {
-      Serial.println("error");
-      Serial.print(F("setPassword() deserializeJson() failed: "));
-      Serial.println(error.f_str());
+      #if DEBUG
+        Serial.println("error");
+        Serial.print(F("setPassword() deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      #endif
     }
     else
     {
@@ -488,13 +600,22 @@ void setPassword()
       writeDoc["password"]=password;
       if(serializeJson(writeDoc,writeFile)==0)
       {
-        Serial.println(F("Failed to write to file when set password"));
+        #if DEBUG
+          Serial.println(F("Failed to write to file when set password"));
+        #endif
       }
       writeFile.close();
     }
   }
   else
   {
-    Serial.println("setPassword() no file&&file.size()");
+    #if DEBUG
+      Serial.println("setPassword() no file&&file.size()");
+    #endif
   }          
+}
+
+void getJson()
+{
+  Serial.printf("init:%d\nonboard:%d\nconnected:%d\n",getInit(),getOnboard(),getConnected());
 }

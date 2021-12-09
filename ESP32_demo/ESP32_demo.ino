@@ -1,13 +1,28 @@
 #include"demo.h"
+
 void setup()
 {
+  
   Serial.begin(115200);
-  delay(2000);
+  //create freertos task
+  Serial.printf("heap size:%u bytes\n",ESP.getHeapSize());
+  Serial.printf("before create tasks heap size:%u bytes\n",ESP.getFreeHeap());
+  xTaskCreate(taskLCD,"taskLCD",2500,NULL,1,&handleLCD);
+  xTaskCreate(taskGreenLED,"taskGreenLED",1000,NULL,1,&handleGreenLED);
+  //xTaskCreate(taskYellowLED,"taskYellowLED",1000,NULL,1,NULL);
+  xTaskCreate(taskAlive,"taskAlive",2500,NULL,1,&handleAlive);
+  xTaskCreate(taskGetFreeHeapWhenRunning,"taskGetFreeHeapWhenRunning",4000,NULL,1,NULL);
+  Serial.printf("after create tasks heap size:%u bytes\n",ESP.getFreeHeap());
+  
+  delay(11000);
+
   if(!SPIFFS.begin(true))
   {
     Serial.println("SPIFFS is broken");
+    storage=SPIFFS_FAIL;
     return;
   }
+
   checkConfig(); //to check UUID and initialized
   if(status==WIFI_NOT_SCANNED)
   {
@@ -44,6 +59,7 @@ void setup()
   server.serveStatic("/",SPIFFS,"/www/").setDefaultFile("index.html");
   server.serveStatic("/img",SPIFFS,"/www/img/");
   server.serveStatic("/favicon",SPIFFS,"/www/favicon.ico");
+ 
   server.on("/info",HTTP_GET,[](AsyncWebServerRequest * req){
     DynamicJsonDocument json(256);
     json["status"] = st[status];
@@ -54,6 +70,7 @@ void setup()
     serializeJson(json, res);
     req->send(200,"application/json",res);
     });
+    
   server.on("/wifiList",HTTP_GET,[](AsyncWebServerRequest * req){
     StaticJsonDocument<1024> doc;
     DeserializationError error = deserializeJson(doc, ssidList);
@@ -73,16 +90,47 @@ void setup()
     serializeJson(json, res);
     req->send(200,"application/json",res);
     });
-  server.on("/sw",HTTP_POST,[](AsyncWebServerRequest * req){
-    Serial.println("sw");
+    
+  server.on("/onboard",HTTP_POST,[](AsyncWebServerRequest * req){
+    Serial.println("onboard");
     //getTest();
     //postTest();
     postOnboard();
     req->send(200);
     });
+
+  server.on("/discard",HTTP_POST,[](AsyncWebServerRequest * req){
+    Serial.println("discard");
+    //getTest();
+    //postTest();
+    postDiscard();
+    req->send(200);
+    });
+
+  /*server.on("/files",HTTP_GET,[](AsyncWebServerRequest * req){
+    Serial.println("files");
+    String webpage="";
+    File root=SD.open("/");
+    if(root)
+    {
+      Serial.println("root");
+      root.rewindDirectory();
+      webpage+="root";
+      root.close();      
+    }
+    else
+    {
+      Serial.println("no root");
+      webpage+="No root";
+    }
+    req->send(200,"text/html",webpage);
+    });*/
+    
+  
   server.begin();
-  Serial.print("Setup()");
+  Serial.println("Setup()");
   Serial.println(st[status]);
+  getJson();
 }
 
 void loop() 
@@ -90,6 +138,7 @@ void loop()
   switch(status)
   {
     case WIFI_DISCONNECTED:
+    case WIFI_CONNECT_FAIL:
       if(BT.available())
       {
         Serial.println(st[status]);
@@ -168,19 +217,37 @@ void loop()
       }
       break;
     case WIFI_SETUP:
-      Serial.println(st[status]);
-      WiFi.begin(ssid,password);
-      while(WiFi.status()!=WL_CONNECTED)
       {
-        Serial.print(".");
-        delay(500);
+        byte wifiConnectCount=0;
+      
+        Serial.println(st[status]);
+        WiFi.begin(ssid,password);
+        while((WiFi.status()!=WL_CONNECTED)&&(wifiConnectCount<WIFI_CONNECT_TIMEOUT_COUNT))
+        {
+          Serial.print(".");
+          wifiConnectCount++;
+          delay(500);
+        }
+        if(wifiConnectCount<WIFI_CONNECT_TIMEOUT_COUNT)
+        {
+          Serial.printf("\nIP address:%s\n",WiFi.localIP().toString().c_str());
+          BT.printf("\nIP address:%s\n",WiFi.localIP().toString().c_str());
+          status=WIFI_CONNECTED;
+          setConnected(1);
+          postOnboard();
+          setSSID();
+          setPassword();
+          //printFile(CONFIG_FILE);
+          getJson();
+        }
+        else
+        {
+          Serial.println("wifi connect fail");
+          BT.println("wifi connect fail");
+          status=WIFI_CONNECT_FAIL;
+          getJson();
+        }
       }
-      Serial.printf("\nIP address:%s\n",WiFi.localIP().toString().c_str());
-      status=WIFI_CONNECTED;
-      setConnected(1);
-      setSSID();
-      setPassword();
-      //printFile(CONFIG_FILE);
       break;
       /*case WIFI_CONNECTED:
         break;*/

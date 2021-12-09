@@ -1,0 +1,142 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>小心心的電毯</title>
+  </head>
+  <body>
+    <form enctype="text/plain">
+      <div id="link"></div>
+      <div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">     
+        <h1>
+          <div style="border:5px #FFAC55 solid;width:200px;height:120px;background-color:#D4E6F8;padding:15px 20px;">
+            <div id="manual"></div><br>      
+            <input id="manualButton" type="button" style="width:120px;height:40px;font-size:20px;">
+          </div>
+          <div style="border:5px #FFAC55 solid;width:200px;height:120px;background-color:#D4E6F8;padding:15px 20px;">
+            <div id="heating"></div><br>      
+            <input id="heatButton" type="button" style="width:120px;height:40px;font-size:20px;">
+          </div>
+          <div style="border:5px #FFAC55 solid;width:200px;height:200px;background-color:#D4E6F8;padding:15px 20px;">
+            最高溫關閉
+            <input type="text" id="temperatureTop" maxlength="3" size="3" style="font-size:20px;"><br>
+            最低溫啟動
+            <input type="text" id="temperatureLow" maxlength="3" size="3" style="font-size:20px;">
+            <input type="button" id="temperatureButton" value="修改臨界值" style="width:120px;height:40px;font-size:20px;">
+          </div>
+          <!--div style="border:5px #FFAC55 solid;width:200px;height:120px;background-color:#D4E6F8;padding:15px 20px;">
+            <input type="button" id="hintButton" value="提示燈" style="width:120px;height:40px;font-size:20px;">
+          </div>-->
+        </h1>
+      </div>
+    </form>
+  </body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  function getData()
+  {
+    $.get("/status",function(data){
+      if(data.manual==1)
+      {
+        $("#manual").text("手動");
+        $("#manualButton").val("自動");
+        $("#heatButton").prop("disabled",false);
+      }
+      else
+      {
+        $("#manual").text("自動");
+        $("#manualButton").val("手動");
+        $("#heatButton").prop("disabled",true);
+      }
+
+      if(data.status==1)
+      {
+        $("#heating").text("加熱中");
+        $("#heatButton").val("關");
+      }
+      else
+      {
+        $("#heating").text("降溫中");
+        $("#heatButton").val("開");
+      }
+
+      $("#temperatureTop").val(data.temperatureTop);
+      $("#temperatureLow").val(data.temperatureLow);
+    });
+  }
+
+  $(function(){
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/setting.html">Setting</a>');
+    getData();
+  });
+
+  $("#manualButton").click(function(){
+    $.get("/manual",function(data)
+    {
+      if(data==1)
+      {
+        $("#manual").text("手動");
+        $("#manualButton").val("自動");
+        $("#heatButton").prop("disabled",false);
+      }
+      else
+      {
+        $("#manual").text("自動");
+        $("#manualButton").val("手動");
+        $("#heatButton").prop("disabled",true);
+      }
+    });
+  });
+ 
+  $("#heatButton").click(function(){
+    $.get("/heating",function(data)
+    {
+      if(data==1)
+      {
+        $("#heating").text("加熱中");
+        $("#heatButton").val("關");
+      }
+      else
+      {
+        $("#heating").text("降溫中");
+        $("#heatButton").val("開");
+      }
+    });
+  }); 
+
+  $("#temperatureButton").click(function(){
+    if(isNaN($("#temperatureTop").val()))
+    {
+      alert("最高溫關閉不是數字");
+    }
+    else if(isNaN($("#temperatureLow").val()))
+    {
+      alert("最低溫啟動不是數字");
+    }
+    else if($("#temperatureTop").val()<$("#temperatureLow").val())
+    {
+      alert("最高溫關閉必須大於最低溫啟動");
+    }
+    else if($("#temperatureTop").val()==$("#temperatureLow").val())
+    {
+      alert("最高溫關閉必須大於最低溫啟動");
+    }
+    else if($("#temperatureTop").val()>35)
+    {
+      alert("最高溫關閉必須小於35度");
+    }
+    else if($("#temperatureLow").val()<15)
+    {
+      alert("最低溫啟動必須大於15度");
+    }
+    else
+    {
+      $.get("/temperature",{"temperatureTop":$("#temperatureTop").val(),"temperatureLow":$("#temperatureLow").val()},function(){});
+      getData();
+    }
+  });
+
+  /*$("#hintButton").click(function(){
+    $.get("/hint",function(){});
+  });*/
+</script>

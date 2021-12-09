@@ -4,6 +4,18 @@
 #include"json.h"
 #include<ESPAsyncWebServer.h>
 #include<HTTPClient.h>
+#include <LiquidCrystal_I2C.h>
+//#include<SD.h>
+
+//ADC write sample 10bits
+#define BITS 10 
+
+//LED pin define
+#define GREEN_LED 2
+#define YELLOW_LED 4
+
+//wifi connect limit
+#define WIFI_CONNECT_TIMEOUT_COUNT 30
 
 /*The information is available on SDK level. If you include #include "user_interface.h", you can use function wifi_station_get_connect_status(). It returns one of:
 
@@ -15,6 +27,7 @@ STATION_IDLE
 The WiFi.status() function uses function wifi_station_get_connect_status(), but returns WL_CONNECT_FAILED for STATION_WRONG_PASSWORD.*/
 
 enum Status{
+  INITIALIZATION,
   WAIT_BLC_CONNECTION,
   WIFI_DISCONNECTED,
   WIFI_NOT_SCANNED,
@@ -24,12 +37,23 @@ enum Status{
   WIFI_SETUP,
   WIFI_CONNECTING,
   WIFI_CONNECTED,
+  WIFI_CONNECT_FAIL,
   WEB_UP
 };
+
+enum Storage{
+  STORAGE_INIT,
+  SPIFFS_FAIL,
+  STORAGE_OK,
+  STORAGE_FAIL,
+  STORAGE_READ,
+  STORAGE_WRITE
+}; 
 
 String ssidList="";
 
 const char *st[]={
+  "initialization",
   "wait blc connection",
   "wifi disconnected",
   "wifi not scanned",
@@ -38,7 +62,9 @@ const char *st[]={
   "wifi setup password",
   "wifi setup",
   "wifi connecting",
-  "wifi connected"
+  "wifi connected",
+  "wifi connect fail",
+  "web up"
   };
 char *pin="0000";
 char val;
@@ -47,9 +73,18 @@ String serverAddr="http://192.168.1.116";
 
 BluetoothSerial BT;
 AsyncWebServer server(80);
-Status status=WIFI_NOT_SCANNED;
+//Status status=WIFI_NOT_SCANNED;
+Status status=INITIALIZATION;
+Storage storage=STORAGE_INIT;
 WiFiClient client;
 HTTPClient http;
+LiquidCrystal_I2C lcd(0x27,20,4);
+//SemaphoreHandle_t xMutex=xSemaphoreCreateMutex();
+TaskHandle_t handleLCD;
+TaskHandle_t handleGreenLED;
+TaskHandle_t handleAlive;
+
+
 
 void printFile(const char *filename)  //print JSON file
 {
@@ -78,11 +113,13 @@ void checkConfig()
   {
     Serial.println("getInit()==1,Initialized");
     getUUID();
+    status=WIFI_NOT_SCANNED;
   }
   else if(initStatus==0)
   {
     Serial.println("getInit()==0,Not Initialized");
     setInit();  
+    status=WIFI_NOT_SCANNED;
   }
   else if(initStatus==2)
   {
@@ -239,21 +276,230 @@ void postOnboard()
   Serial.printf("url:%s\n",url.c_str());
   http.begin(client,url);
   http.addHeader("Content-Type","application/json");
-  StaticJsonDocument<200> doc;
-  doc["mac"]=WiFi.macAddress();
-  doc["uuid"]= uuid;
+  StaticJsonDocument<200> writeDoc;
+  writeDoc["mac"]=WiFi.macAddress();
+  writeDoc["uuid"]=uuid;
+  writeDoc["status"]="online";
   String requestBody;
-  serializeJson(doc, requestBody);
+  serializeJson(writeDoc, requestBody);
   int httpCode=http.POST(requestBody);
 
   if(httpCode>0)
   {
     String payload=http.getString();
-    Serial.printf("postTest() %s\n",payload.c_str());
+    Serial.printf("postOnboard() %s\n",payload.c_str());
+    StaticJsonDocument<50> readDoc;
+    DeserializationError error = deserializeJson(readDoc,payload);
+
+    if (error) 
+    {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      return;
+    }
+    const char* temp = readDoc["onboard"]; // "success"
+    Serial.println(temp);
+    if(String(temp)=="success")
+    {
+      Serial.println("onboard success"); 
+      setOnboard(1);
+    }    
+    else
+    {
+      Serial.println("onboard fail"); 
+    }
   }
   else
   {
-    Serial.println("postTest() error request");
+    Serial.println("postOnboard() error request");
   }
   http.end();  
+  getJson();
+}
+
+void postDiscard()
+{
+  String url=serverAddr+"/discard";
+  Serial.printf("url:%s\n",url.c_str());
+  http.begin(client,url);
+  http.addHeader("Content-Type","application/json");
+  StaticJsonDocument<200> writeDoc;
+  writeDoc["uuid"]=uuid;
+  writeDoc["status"]="discarded";
+  String requestBody;
+  serializeJson(writeDoc, requestBody);
+  int httpCode=http.POST(requestBody);
+
+  if(httpCode>0)
+  {
+    String payload=http.getString();
+    Serial.printf("postDiscard() %s\n",payload.c_str());
+    StaticJsonDocument<50> readDoc;
+    DeserializationError error = deserializeJson(readDoc,payload);
+
+    if (error) 
+    {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      return;
+    }
+    const char* temp = readDoc["discard"]; // "success"
+    Serial.println(temp);
+    if(String(temp)=="success")
+    {
+      Serial.println("discard success"); 
+      setOnboard(0);
+      setConnected(0);
+      setUUID();
+      WiFi.disconnect(true);
+      status=WIFI_DISCONNECTED;
+    }    
+    else
+    {
+      Serial.println("discard fail"); 
+    }
+  }
+  else
+  {
+    Serial.println("postDiscard() error request");
+  }
+  http.end();  
+  getJson();  
+}
+
+void taskLCD(void *pvParam)
+{
+  byte lcdStatus=INITIALIZATION;
+  Wire.begin();
+  Wire.setClock(5000);//set wire clock to prevent LCD garbled 5kMhz
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.print("Initializtion...");
+  delay(1000);
+  while(1)
+  {
+    if(storage==STORAGE_FAIL)
+    {
+      lcd.setCursor(0,1);
+      lcd.print("Storage fail");
+    }
+    //xSemaphoreTake(xMutex,portMAX_DELAY);
+    if((lcdStatus!=status)&&(status!=WIFI_CONNECTING))
+    //if(lcdStatus!=status)
+    {
+      lcdStatus=status;
+      lcd.clear();
+      lcd.setCursor(0,0);
+      if(status==WIFI_CONNECTED)
+      {
+        lcd.printf("IP:%s",WiFi.localIP().toString().c_str());
+      }
+      else
+      {
+        lcd.print("No wifi connection");
+      }
+      lcd.setCursor(0,1);
+      lcd.printf("onboard:%d",getOnboard());
+      lcd.setCursor(0,2);
+      lcd.printf("UUID:%s",uuid);
+      lcd.setCursor(0,3);
+      lcd.print(st[status]);
+    }
+    //xSemaphoreGive(xMutex);
+    vTaskDelay(500/portTICK_PERIOD_MS);
+  }
+}
+
+void taskGreenLED(void *pvParam)
+{
+  pinMode(GREEN_LED,OUTPUT);
+  analogSetAttenuation(ADC_11db);
+  analogSetWidth(BITS);
+  ledcSetup(0,5000,BITS);
+  ledcAttachPin(GREEN_LED,0);
+  int lumen=0;
+  bool up=true;
+  while(1)
+  {
+    //xSemaphoreTake(xMutex,portMAX_DELAY);
+    ledcWrite(0,lumen);
+    if(status==WIFI_CONNECTED)
+    {
+      lumen=1024;
+    }
+    else
+    {
+      if(up)
+      {
+        lumen+=100;
+        if(lumen>1024)
+        {
+          lumen=1023;
+          up=false;
+        }
+      }
+      else
+      {
+        lumen-=100;
+        if(lumen<0)
+        {
+          lumen=1;
+          up=true;
+        }
+      }
+    }
+    //xSemaphoreGive(xMutex);
+    vTaskDelay(100/portTICK_PERIOD_MS);
+  }
+}
+
+/*void taskYellowLED(void *pvParam)
+{
+  pinMode(YELLOW_LED,OUTPUT); 
+  while(1)
+  {
+    if(storage==STORAGE_FAIL)
+    {
+      digitalWrite(YELLOW_LED,HIGH);
+    }
+    else if(storage==STORAGE_OK)
+    {
+      digitalWrite(YELLOW_LED,LOW);
+    }
+    else
+    {
+      digitalWrite(YELLOW_LED,!digitalRead(YELLOW_LED));
+    }
+    vTaskDelay(300/portTICK_PERIOD_MS);
+  }
+}*/
+void taskAlive(void *pvParam)
+{
+  while(1)
+  {
+    if((getOnboard()==1)&&(status==WIFI_CONNECTED))
+    {
+      //Serial.println("Send alive"); 
+      String url=serverAddr+"/alive";
+      //Serial.printf("url:%s\n",url.c_str());
+      http.begin(client,url);
+      http.addHeader("Content-Type","application/json");
+      StaticJsonDocument<48> writeDoc;
+      writeDoc["uuid"]=uuid;
+      String requestBody;
+      serializeJson(writeDoc, requestBody);
+      int httpCode=http.POST(requestBody);
+    }
+    vTaskDelay(10000/portTICK_PERIOD_MS);
+  }
+}
+
+void taskGetFreeHeapWhenRunning(void *pvParam)
+{
+  while(1)
+  {
+    Serial.printf("running tasks heap size:%u bytes\n",ESP.getFreeHeap());
+    vTaskDelay(5000/portTICK_PERIOD_MS);
+  }
 }
