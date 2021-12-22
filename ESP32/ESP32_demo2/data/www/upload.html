@@ -15,16 +15,21 @@
 <body>
   <div id="link"></div>
   <h1>ESP32 DEMO UPLOAD<br>
-      
+      Choose a profile files:<br>
+      <input type="file" id="file"><br>
+      <input type="button" id="upload" value="UPLOAD">
   </h1>
 </body>
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript">
   $(function(){
-    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/sw.html">SW</a>'+'   <a href="http://'+window.location.hostname+'/upload.html">UPLOAD</a>'+'   <a href="http://'+window.location.hostname+'/files.html">FILES</a>');
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/sw.html">SW</a>'+'   <a href="http://'+window.location.hostname+'/upload.html">UPLOAD</a>'+'   <a href="http://'+window.location.hostname+'/files.html">FILES</a>'); 
+  });
 
- 
-  
+  $("#upload").click(function(){
+    $.get("/upload",function(data){
+
+    });
   });
 </script>

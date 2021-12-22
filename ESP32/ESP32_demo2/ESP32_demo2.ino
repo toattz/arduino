@@ -132,6 +132,10 @@ void setup()
     //Serial.println(res);
     req->send(200,"text/html",res);
     });
+
+  server.on("/upload",HTTP_GET,[](AsuncWebServerRequest * req){
+    
+    });
   server.begin();
   getJson();
 }

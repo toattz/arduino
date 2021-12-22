@@ -59,5 +59,9 @@
   $(function(){
     $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/setting.html">Setting</a>');
     getData();
+
+    window.setInterval(function(){
+       getData();
+    },3000);
   });
 </script>
