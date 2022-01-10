@@ -6,7 +6,7 @@
   <body>
     <form enctype="text/plain">
       <div id="link"></div>
-      <div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">     
+      <div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">    
         <h1>
           <div style="border:5px #FFAC55 solid;width:200px;height:120px;background-color:#D4E6F8;padding:15px 20px;">
             <div id="manual"></div><br>      
@@ -16,16 +16,6 @@
             <div id="heating"></div><br>      
             <input id="heatButton" type="button" style="width:120px;height:40px;font-size:20px;">
           </div>
-          <div style="border:5px #FFAC55 solid;width:200px;height:200px;background-color:#D4E6F8;padding:15px 20px;">
-            最高溫關閉
-            <input type="text" id="temperatureTop" maxlength="3" size="3" style="font-size:20px;"><br>
-            最低溫啟動
-            <input type="text" id="temperatureLow" maxlength="3" size="3" style="font-size:20px;">
-            <input type="button" id="temperatureButton" value="修改臨界值" style="width:120px;height:40px;font-size:20px;">
-          </div>
-          <!--div style="border:5px #FFAC55 solid;width:200px;height:120px;background-color:#D4E6F8;padding:15px 20px;">
-            <input type="button" id="hintButton" value="提示燈" style="width:120px;height:40px;font-size:20px;">
-          </div>-->
         </h1>
       </div>
     </form>
@@ -59,9 +49,6 @@
         $("#heating").text("降溫中");
         $("#heatButton").val("開");
       }
-
-      $("#temperatureTop").val(data.temperatureTop);
-      $("#temperatureLow").val(data.temperatureLow);
     });
   }
 
@@ -103,38 +90,6 @@
       }
     });
   }); 
-
-  $("#temperatureButton").click(function(){
-    if(isNaN($("#temperatureTop").val()))
-    {
-      alert("最高溫關閉不是數字");
-    }
-    else if(isNaN($("#temperatureLow").val()))
-    {
-      alert("最低溫啟動不是數字");
-    }
-    else if($("#temperatureTop").val()<$("#temperatureLow").val())
-    {
-      alert("最高溫關閉必須大於最低溫啟動");
-    }
-    else if($("#temperatureTop").val()==$("#temperatureLow").val())
-    {
-      alert("最高溫關閉必須大於最低溫啟動");
-    }
-    else if($("#temperatureTop").val()>41)
-    {
-      alert("最高溫關閉必須小於41度");
-    }
-    else if($("#temperatureLow").val()<15)
-    {
-      alert("最低溫啟動必須大於15度");
-    }
-    else
-    {
-      $.get("/temperature",{"temperatureTop":$("#temperatureTop").val(),"temperatureLow":$("#temperatureLow").val()},function(){});
-      getData();
-    }
-  });
 
   /*$("#hintButton").click(function(){
     $.get("/hint",function(){});

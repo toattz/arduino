@@ -1,0 +1,117 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>小心心的電毯</title>
+  </head>
+  <body>
+    <form enctype="text/plain">
+      <div id="link"></div>
+      <div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">    
+        <h1>
+          <div>
+            <input type="checkbox" name="ch[]" value="0">0~1<br>
+            <input type="checkbox" name="ch[]" value="1">1~2<br>
+            <input type="checkbox" name="ch[]" value="2">2~3<br>
+            <input type="checkbox" name="ch[]" value="3">3~4<br>
+            <input type="checkbox" name="ch[]" value="4">4~5<br>
+            <input type="checkbox" name="ch[]" value="5">5~6<br>
+            <input type="checkbox" name="ch[]" value="6">6~7<br>
+            <input type="checkbox" name="ch[]" value="7">7~8<br>
+            <input type="checkbox" name="ch[]" value="8">8~9<br>
+            <input type="checkbox" name="ch[]" value="9">9~10<br>
+            <input type="checkbox" name="ch[]" value="10">10~11<br>
+            <input type="checkbox" name="ch[]" value="11">11~12<br>
+            <input type="checkbox" name="ch[]" value="12">12~13<br>
+            <input type="checkbox" name="ch[]" value="13">13~14<br>
+            <input type="checkbox" name="ch[]" value="14">14~15<br>
+            <input type="checkbox" name="ch[]" value="15">15~16<br>
+            <input type="checkbox" name="ch[]" value="16">16~17<br>
+            <input type="checkbox" name="ch[]" value="17">17~18<br>
+            <input type="checkbox" name="ch[]" value="18">18~19<br>
+            <input type="checkbox" name="ch[]" value="19">19~20<br>
+            <input type="checkbox" name="ch[]" value="20">20~21<br>
+            <input type="checkbox" name="ch[]" value="21">21~22<br>
+            <input type="checkbox" name="ch[]" value="22">22~23<br>
+            <input type="checkbox" name="ch[]" value="23">23~0<br>
+          </div>
+        </h1>
+      </div>
+    </form>
+  </body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  function getData()
+  {
+    $("input[name='ch[]']").each(function(){
+      var tmp=$(this);
+      $.get("/heat",{"id":$(this).val()},function(data){
+        if(data==1)
+        {
+          //alert($(this).val()+"true");
+          //$(this).prop("checked",true);
+          tmp.prop("checked",true);
+        }
+        else
+        {
+          //$(this).prop("checked",false);
+          tmp.prop("checked",false);
+        }
+      });
+    });
+  }
+
+  $(function(){
+    $("#link").html('<a href="http://'+window.location.hostname+'/index.html">Home</a>'+'   <a href="http://'+window.location.hostname+'/setting.html">Setting</a>');
+    getData();
+  });
+
+  $("#manualButton").click(function(){
+    $.get("/manual",function(data)
+    {
+      if(data==1)
+      {
+        $("#manual").text("手動");
+        $("#manualButton").val("自動");
+        $("#heatButton").prop("disabled",false);
+      }
+      else
+      {
+        $("#manual").text("自動");
+        $("#manualButton").val("手動");
+        $("#heatButton").prop("disabled",true);
+      }
+    });
+  });
+ 
+  $("#heatButton").click(function(){
+    $.get("/heating",function(data)
+    {
+      if(data==1)
+      {
+        $("#heating").text("加熱中");
+        $("#heatButton").val("關");
+      }
+      else
+      {
+        $("#heating").text("降溫中");
+        $("#heatButton").val("開");
+      }
+    });
+  }); 
+
+  $("input[name='ch[]']").each(function() {
+    $(this).change(function(){
+      if($(this).prop("checked")==true)
+      {
+        $.get("/set",{"id":$(this).val(),"val":1},function(){});
+        //alert($(this).val()+"true");
+      }
+      else
+      {
+        $.get("/set",{"id":$(this).val(),"val":0},function(){});
+        //alert($(this).val()+"false");
+      }
+    });
+  });
+</script>
