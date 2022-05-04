@@ -6,8 +6,10 @@
 //ESP-01S
 #define relayPin 0// relay connected to  GPIO0
 
-const char* ssid="ZYXEL_3F";
-const char* password="C1470A9A";
+/*const char* ssid="ZYXEL_3F";
+const char* password="C1470A9A";*/
+const char* ssid="Q60_toattz";
+const char* password="12345678";
 
 // Set web server port number to 80
 AsyncWebServer server(80);
@@ -46,7 +48,8 @@ void setup()
   // Connect to Wi-Fi network with SSID and password
   WiFi.mode(WIFI_STA);
   //WiFi.hostname("ESP-01S_CAT_FAN_RELAY_V2");
-  WiFi.hostname("啾啾王 ");
+  //WiFi.hostname("啾啾王 ");
+  WiFi.hostname("IOT_DEMO");
   Serial.printf("Connecting to %s\n",ssid);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
