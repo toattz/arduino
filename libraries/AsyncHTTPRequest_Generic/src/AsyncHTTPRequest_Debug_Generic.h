@@ -17,7 +17,7 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
   You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.3.0
+  Version: 1.8.1
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -32,6 +32,15 @@
   1.1.5    K Hoang     22/03/2021 Fix dependency on STM32AsyncTCP Library
   1.2.0    K Hoang     11/04/2021 Add support to LAN8720 using STM32F4 or STM32F7
   1.3.0    K Hoang     09/07/2021 Add support to WT32_ETH01 (ESP32 + LAN8720) boards
+  1.3.1    K Hoang     09/10/2021 Update `platform.ini` and `library.json`
+  1.4.0    K Hoang     23/11/2021 Fix crashing bug when request a non-existing IP
+  1.4.1    K Hoang     29/11/2021 Auto detect ESP32 core version and improve connection time for WT32_ETH01
+  1.5.0    K Hoang     30/12/2021 Fix `multiple-definitions` linker error
+  1.6.0    K Hoang     23/01/2022 Enable compatibility with old code to include only AsyncHTTPRequest_Generic.h
+  1.7.0    K Hoang     10/02/2022 Add support to new ESP32-S3. Add LittleFS support to ESP32-C3. Use core LittleFS
+  1.7.1    K Hoang     25/02/2022 Add example AsyncHTTPRequest_ESP_Multi to demo connection to multiple addresses
+  1.8.0    K Hoang     13/04/2022 Add support to ESP8266 using W5x00 with lwip_W5100 or lwip_W5500 library
+  1.8.1    K Hoang     13/04/2022 Add support to ESP8266 using ENC28J60 with lwip_enc28j60 library
  *****************************************************************************************************************************/
 
 #pragma once

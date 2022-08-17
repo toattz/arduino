@@ -65,14 +65,19 @@ const char* password    = "your_pass";
   #include <WiFi.h>
 #endif
 
-#include <AsyncHTTPRequest_Generic.h>           // https://github.com/khoih-prog/AsyncHTTPRequest_Generic
+#define ASYNC_HTTP_REQUEST_GENERIC_VERSION_MIN_TARGET      "AsyncHTTPRequest_Generic v1.7.0"
+#define ASYNC_HTTP_REQUEST_GENERIC_VERSION_MIN             1007000
+
+// To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
+#include <AsyncHTTPRequest_Generic.h>             // https://github.com/khoih-prog/AsyncHTTPRequest_Generic
+
 #include <Ticker.h>
 
 AsyncHTTPRequest request;
 Ticker ticker;
 Ticker ticker1;
 
-void heartBeatPrint(void)
+void heartBeatPrint()
 {
   static int num = 1;
 
@@ -108,12 +113,12 @@ void sendRequest()
     }
     else
     {
-      Serial.println("Can't send bad request");
+      Serial.println(F("Can't send bad request"));
     }
   }
   else
   {
-    Serial.println("Can't send request");
+    Serial.println(F("Can't send request"));
   }
 }
 
@@ -123,9 +128,9 @@ void requestCB(void* optParm, AsyncHTTPRequest* request, int readyState)
   
   if (readyState == readyStateDone) 
   {
-    Serial.println("\n**************************************");
+    Serial.println(F("\n**************************************"));
     Serial.println(request->responseText());
-    Serial.println("**************************************");
+    Serial.println(F("**************************************"));
     
     request->setDebug(false);
   }
@@ -136,23 +141,25 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(115200);
   while (!Serial);
+
+  delay(200);
   
-  Serial.println("\nStarting AsyncHTTPRequest_ESP using " + String(ARDUINO_BOARD));
+  Serial.print(F("\nStarting AsyncHTTPRequest_ESP using ")); Serial.println(ARDUINO_BOARD);
   Serial.println(ASYNC_HTTP_REQUEST_GENERIC_VERSION);
 
   WiFi.mode(WIFI_STA);
 
   WiFi.begin(ssid, password);
   
-  Serial.println("Connecting to WiFi SSID: " + String(ssid));
+  Serial.print(F("Connecting to WiFi SSID: ")); Serial.println(ssid);
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    Serial.print(".");
+    Serial.print(F("."));
   }
 
-  Serial.print(F("AsyncHTTPRequest @ IP : "));
+  Serial.print(F("\nAsyncHTTPRequest @ IP : "));
   Serial.println(WiFi.localIP());
  
   request.setDebug(false);

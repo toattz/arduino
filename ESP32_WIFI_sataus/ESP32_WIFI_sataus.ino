@@ -9,7 +9,8 @@
 //#include <WiFi.h>
 #include <ESPAsync_WiFiManager.h>
 AsyncWebServer webServer(80);
-const char* ssid     = "ZYXEL_1F";
+//const char* ssid     = "ZYXEL_1F";
+const char* ssid     = "TP-LINK_470A9A";
 const char* password = "C1470A9A";
 
 const char* host = "data.sparkfun.com";
@@ -30,7 +31,7 @@ void setup()
     Serial.println();
     Serial.print("Connecting to ");
     Serial.println(ssid);
-
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 
     while (WiFi.status() != WL_CONNECTED) {

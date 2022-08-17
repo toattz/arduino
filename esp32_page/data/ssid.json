@@ -1,0 +1,33 @@
+{
+  "wifiCounts": 7,
+  "ssids": [
+    {
+      "ssid": "DIRECT-ab-HP M28 LaserJet",
+      "rssi": -37
+    },
+    {
+      "ssid": "ZYXEL_1F",
+      "rssi": -50
+    },
+    {
+      "ssid": "TP-LINK_470A9A",
+      "rssi": -68
+    },
+    {
+      "ssid": "ZYXEL_3F",
+      "rssi": -76
+    },
+    {
+      "ssid": "duo-net",
+      "rssi": -79
+    },
+    {
+      "ssid": "TOTOLINK",
+      "rssi": -91
+    },
+    {
+      "ssid":"22",
+      "rssi": -91
+    }
+  ]
+}

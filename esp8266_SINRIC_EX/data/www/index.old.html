@@ -1,0 +1,112 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>ESP-01S Web Server Switch handling</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3>MENU</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="list-group">
+                                <label class="list-group-item rounded-3 py-3" for="swMenu">開關繼電器</label>
+                                <label class="list-group-item rounded-3 py-3" for="restartMenu">重新開機</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <div class="panel panel-default">
+                          <h3 id="func">Function</h3>
+                    </div>
+                    <div class="panel-body ">
+                        <form enctype="text/plain" id="swForm" class="">
+                            <!--<div style="position:absolute;left:50%;top:50%;margin-left:-150px;margin-top:-150px;">-->
+                                <h1 id="state"></h1>
+                                <input type="hidden" id="sw" value="0">
+                                <input id="submit" type="button" value="關" style="width:120px;height:40px;font-size:20px;">
+                            <!--</div>-->
+                        </form>
+                        <form id="restartForm">
+                            <input id="restart" type="button" value="重新開機" style="width:120px;height:40px;font-size:20px;">
+                        </form>           
+                    </div>
+                    <div class="panel-footer">
+
+                    </div>
+                </div>      
+            </div>    
+        </div>
+    </body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  function getData()
+  {
+    $.get("/state",function(data){
+      //alert(data)
+      if(data==1)
+      {
+        //alert("on");
+        $("#state").text("狀態:開")
+        $("#sw").val(0);
+        $("#submit").val("關");
+      }
+      else
+      {
+        //alert("off");
+        $("#state").text("狀態:關")
+        $("#sw").val(1);
+        $("#submit").val("開");
+      }
+    });
+  }
+
+  $(function(){
+    getData();
+    $("#restartForm").hide();
+    $("#func").text($('label[for="swMenu"]').text());
+  });
+
+  /*$("#submit").click(function(){
+    sw=$("#sw").val();
+    //alert(sw);
+    connection.send(sw);
+    getData();
+  });*/
+ 
+  $("#submit").click(function(){
+    var data = $("#sw").val();
+    $.post("/sw", { val: data });
+    //sleep(1);
+    getData();
+  });
+
+  $("#restart").click(function(){
+    $.post("/restart",{});
+    //sleep(3000);
+    //window.location.reload();
+  });
+
+  $('label[for="swMenu"]').click(function(){
+    $("#func").text($(this).text());
+    $("#swForm").show();
+    $("#restartForm").hide();
+    $("label").css({"background-color":"white","color":"black"});
+    $(this).css({"background-color":"yellow","color":"blue"});
+  });
+  $('label[for="restartMenu"]').click(function(){
+    $("#func").text($(this).text());
+    $("#swForm").hide();
+    $("#restartForm").show();
+    $("label").css({"background-color":"white","color":"black"});
+    $(this).css({"background-color":"yellow","color":"blue"});
+  });
+</script>

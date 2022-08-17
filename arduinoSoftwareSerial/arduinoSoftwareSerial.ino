@@ -10,7 +10,7 @@ void setup()
 
 void loop() 
 {
-  Serial.println(i);
+  //Serial.println(i);
   //mySerial.write("jjjjjjjjjjjj");
   mySerial.write("Testttttttttttt\n");
   /*i=i+1;
@@ -19,3 +19,4 @@ void loop()
     i=0;*/
   delay(1000);
 }
+/* USB to rs485 D+=>TX  D-=>RX*/

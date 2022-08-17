@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ESP32 Demo</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    </style>
+    <style type="text/css">
+      .kv{
+        width: 100%;
+        height: 98vh;
+        background-image: url('http://picsum.photos/1400/900?random=10');
+        background-size: cover;
+      }
+
+      table{
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 1em;
+      }
+
+      input.form-check-input {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="kv">
+      <div class="container">
+        <ul class="nav nav-tabs mb-4 mb-sm-5 justify-content-center">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Network Info</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">DHT11 Info</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Line</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Restart Device</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">LED Demo</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled">建構中</a>
+          </li>
+        </ul>
+        <div class="row justify-content-center">
+          <div class="col-12 col-sm-6">
+            <table class="border-5 border border-info mx-auto">
+              <tr>
+                <td>
+                  <div id="networkInfoForm">    
+                    <h4 id="ap" class="alert alert-primary mt-4 mb-4 ms-4 me-4">www</h4>                
+                    <h4 id="ip" class="alert alert-primary mt-4 mb-4 ms-4 me-4">www</h4>
+                    <h4 id="mdns" class="alert alert-primary mt-4 mb-4 ms-4 me-4">www</h4>                    
+                  </div>
+                  <div id="DHT11InfoForm">
+                    <h4 id="temperature" class="alert alert-primary mt-4 mb-4 ms-4 me-4">www</h4>                
+                    <h4 id="humidity" class="alert alert-primary mt-4 mb-4 ms-4 me-4">www</h4>
+                    <div class="d-grid gap-2 mx-auto">
+                      <input id="dht11" type="button" value="Send Data" class="me-5 ms-5 mb-4 mt-2 btn btn-primary btn-lg">
+                    </div>
+                  </div>
+                  <div id="lineForm">                
+                    <button id="line" type="button" class="m-4 btn btn-primary btn-lg">Send Line Message</button>
+                  </div>
+                  <div id="restartDeviceForm">
+                    <input id="restartDevice" type="button" value="Restart Device" class="m-4 btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  </div>
+                  <div id="LEDDemoForm">
+                    <div class="form-check mt-4 mb-2 ms-4 me-4">
+                      <input class="form-check-input me-3 mt-2" type="checkbox" value="" id="redLEDDemoCheck">
+                      <label class="form-check-label" for="redLEDDemoCheck" id="redLEDDemoLabel">
+                        Default checkbox
+                      </label>
+                    </div>
+                    <div class="form-check mt-2 mb-2 ms-4 me-4">
+                      <input class="form-check-input me-3 mt-2" type="checkbox" value="" id="yellowLEDDemoCheck">
+                      <label class="form-check-label" for="yellowLEDDemoCheck" id="yellowLEDDemoLabel">
+                        Disabled checkbox
+                      </label>
+                    </div>
+                    <div class="form-check mt-2 mb-4 ms-4 me-4">
+                      <input class="form-check-input me-3 mt-2" type="checkbox" value="" id="greenLEDDemoCheck">
+                      <label class="form-check-label" for="greenLEDDemoCheck" id="greenLEDDemoLabel">
+                        Disabled checkbox
+                      </label>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+<!--Toasts-->
+              <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="toast-header">
+                    <img src="/img/logo.png" style="width:20px;height: 20px;" class="rounded me-2" alt="...">
+                    <strong class="me-auto" id="toast-title">Bootstrap</strong>
+                    <small>ESP32 Demo</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                  <div class="toast-body" id="toast-body">
+                    Hello, world! This is a toast message.
+                  </div>
+                </div>
+              </div>
+<!--Toasts-->
+<!--Modal-->
+              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Restart Device</h5>
+                      <button type="button" class="btn-close disabled" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div id="modal-reload" class="modal-body">
+                      
+                    </div>
+                    <div class="modal-footer">
+                      <button id="button2" type="button" class="btn btn-secondary disabled" data-bs-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+<!--Modal-->
+          </div>             
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script src="/js/jquery-3.6.0.min.js"></script>
+<script>
+  function getIP()
+  {
+    $.get("/ip",function(data){
+      $("#ip").text("IP:"+data);
+    });
+  }
+
+  function getMDNS()
+  {
+    $.get("/mdns",function(data){
+      $("#mdns").text("mDNS:"+data);
+    });
+  }
+
+  function getAP()
+  {
+    $.get("/ap",function(data){
+      $("#ap").text("Access Point:"+data);
+    });  
+  }
+
+  function getTemperature()
+  {
+    $.get("/temperature",function(data){
+      $("#temperature").text("Temperature:"+data+"°C");
+    });
+  }
+
+  function getHumidity()
+  {
+    $.get("/humidity",function(data){
+      $("#humidity").text("Humidity:"+data+"%");
+    });
+  }
+
+  function getRedLEDDemo()
+  {
+    $.get("/redLEDDemo",function(data){
+      if(data==1)
+      {
+        $("#redLEDDemoLabel").html("<h4 class=\"alert alert-primary\">Red LED Demo:ON</h4>");
+        $("#redLEDDemoCheck").prop('checked', true);
+      }
+      else
+      {
+        $("#redLEDDemoLabel").html("<h4 class=\"alert alert-primary\">Red LED Demo:OFF</h4>");
+        $("#redLEDDemoCheck").prop('checked', false);
+      }
+    });
+  }
+
+  function getYellowLEDDemo()
+  {
+    $.get("/yellowLEDDemo",function(data){
+      if(data==1)
+      {
+        $("#yellowLEDDemoLabel").html("<h4 class=\"alert alert-primary\">Yellow LED Demo:ON</h4>");
+        $("#yellowLEDDemoCheck").prop('checked', true);
+      }
+      else
+      {
+        $("#yellowLEDDemoLabel").html("<h4 class=\"alert alert-primary\">Yellow LED Demo:OFF</h4>");
+        $("#yellowLEDDemoCheck").prop('checked', false);
+      }
+    });
+  }
+
+
+  function getGreenLEDDemo()
+  {
+    $.get("/greenLEDDemo",function(data){
+      if(data==1)
+      {
+        $("#greenLEDDemoLabel").html("<h4 class=\"alert alert-primary\">Green LED Demo:ON</h4>");
+        $("#greenLEDDemoCheck").prop('checked', true);
+      }
+      else
+      {
+        $("#greenLEDDemoLabel").html("<h4 class=\"alert alert-primary\">Green LED Demo:OFF</h4>");
+        $("#greenLEDDemoCheck").prop('checked', false);
+      }
+    });
+  }
+
+  $(function(){
+    getAP();
+    getIP();
+    getMDNS();
+
+    $("#networkInfoForm").show();
+    $("#DHT11InfoForm").hide();
+    $("#lineForm").hide();
+    $("#restartDeviceForm").hide();
+    $("#LEDDemoForm").hide();
+  });
+
+ 
+  $(".nav-link").click(function(){
+    $(".nav-link").removeClass('active');
+    $(this).addClass('active');
+    
+    $("#networkInfoForm").hide();
+    $("#DHT11InfoForm").hide();
+    $("#lineForm").hide();
+    $("#restartDeviceForm").hide();
+    $("#LEDDemoForm").hide();
+
+    if($(this).text()=="Network Info")
+    {
+      $("#networkInfoForm").show();
+    }
+    else if($(this).text()=="DHT11 Info")
+    {
+      $("#DHT11InfoForm").show();
+      getTemperature();
+      getHumidity();
+    }
+    else if($(this).text()=="Line")
+    {
+      $("#lineForm").show();
+    }
+    else if($(this).text()=="Restart Device")
+    {
+      $("#restartDeviceForm").show();
+    }
+    else
+    {
+      $("#LEDDemoForm").show();
+      getRedLEDDemo();
+      getYellowLEDDemo();
+      getGreenLEDDemo();
+    }
+  });
+
+  $("#restartDevice").click(function(){
+    $.post("/restartDevice",{});
+    var i=10;
+    intervalID=setInterval(function(){
+      $("#modal-reload").text(i+"秒後重新載入網頁");
+      i=i-1;
+      if(i<0)
+      {
+        //clearInterval(intervalID);
+        location.reload(true);
+      }
+    },1000);
+  });
+
+  $("#line").click(function(){
+    $.post("/line",function(data){});
+    $("#toast-title").text("Line");
+    $("#toast-body").text("Line Messages are sent.");
+    var toast = new bootstrap.Toast($("#liveToast"));
+    toast.show();
+  });
+
+  $("#dht11").click(function(){
+    $.post("/DHT11",function(data){});
+    $("#toast-title").text("DHT11");
+    $("#toast-body").text("DHT11 Data is sent.");
+    var toast = new bootstrap.Toast($("#liveToast"));
+    toast.show();
+  });
+
+  $("#redLEDDemoCheck").change(function(){
+    $.post("/redLEDDemo",{});
+    getRedLEDDemo();
+  });
+
+  $("#yellowLEDDemoCheck").change(function(){
+    $.post("/yellowLEDDemo",{});
+    getYellowLEDDemo();
+  });
+
+  $("#greenLEDDemoCheck").change(function(){
+    $.post("/greenLEDDemo",{});
+    getGreenLEDDemo();
+  });
+</script>
